@@ -23,25 +23,101 @@ const Page: FC<PageProps> = ({ id, className, children }) => (
     </div>
 );
 
-function getBackdrop() {
-    const w = window as any;
-    return {
-        clearBackdrop: () => {
-            if (typeof w.Backdrop?.clear === 'function') w.Backdrop.clear();
-            else if (typeof w.clearBackdrop === 'function') w.clearBackdrop();
-        },
-        setBackdrop: (url: string) => {
-            if (typeof w.Backdrop?.setBackdrop === 'function') w.Backdrop.setBackdrop(url);
-            else if (typeof w.setBackdrop === 'function') w.setBackdrop(url);
-        },
-        setBackdropImages: (urls: string[]) => {
-            if (typeof w.Backdrop?.setBackdropImages === 'function') w.Backdrop.setBackdropImages(urls);
-            else if (typeof w.setBackdropImages === 'function') w.setBackdropImages(urls);
+class SeerBackdropManager {
+    private container: HTMLElement | null = null;
+    private currentImages: string[] = [];
+    private currentIndex = -1;
+    private intervalId: any = null;
+    private currentActiveImg: HTMLElement | null = null;
+
+    private getContainer(): HTMLElement {
+        if (!this.container || !document.body.contains(this.container)) {
+            let existing = document.getElementById('seerBackdropContainer');
+            if (!existing) {
+                existing = document.createElement('div');
+                existing.id = 'seerBackdropContainer';
+                existing.className = 'seerBackdropContainer';
+                const seerRoot = document.getElementById('seerPluginRoot') || document.body;
+                seerRoot.insertBefore(existing, seerRoot.firstChild);
+            }
+            this.container = existing;
         }
-    };
+        return this.container;
+    }
+
+    public setBackdrop(url: string) {
+        this.clearRotation();
+        this.transitionTo(url);
+    }
+
+    public setBackdropImages(urls: string[]) {
+        if (!urls || urls.length === 0) {
+            this.clear();
+            return;
+        }
+        this.currentImages = urls;
+        this.currentIndex = 0;
+        this.transitionTo(urls[0]);
+
+        this.clearRotation();
+        if (urls.length > 1) {
+            this.intervalId = setInterval(() => {
+                this.currentIndex = (this.currentIndex + 1) % this.currentImages.length;
+                this.transitionTo(this.currentImages[this.currentIndex]);
+            }, 8000);
+        }
+    }
+
+    private transitionTo(url: string) {
+        if (!url) return;
+        const container = this.getContainer();
+        const seerRoot = document.getElementById('seerPluginRoot');
+        if (seerRoot) seerRoot.classList.add('withBackdrop');
+
+        const img = new Image();
+        img.onload = () => {
+            const backdropEl = document.createElement('div');
+            backdropEl.className = 'seerBackdropImage';
+            backdropEl.style.backgroundImage = `url("${url}")`;
+            container.appendChild(backdropEl);
+
+            requestAnimationFrame(() => {
+                backdropEl.classList.add('active');
+            });
+
+            const oldImg = this.currentActiveImg;
+            this.currentActiveImg = backdropEl;
+            if (oldImg) {
+                setTimeout(() => {
+                    if (oldImg.parentElement) oldImg.remove();
+                }, 1000);
+            }
+        };
+        img.src = url;
+    }
+
+    public clear() {
+        this.clearRotation();
+        if (this.container) {
+            this.container.innerHTML = '';
+        }
+        this.currentActiveImg = null;
+        const seerRoot = document.getElementById('seerPluginRoot');
+        if (seerRoot) seerRoot.classList.remove('withBackdrop');
+    }
+
+    private clearRotation() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    }
 }
 
-const { clearBackdrop, setBackdrop, setBackdropImages } = getBackdrop();
+const seerBackdrops = new SeerBackdropManager();
+const clearBackdrop = () => seerBackdrops.clear();
+const setBackdrop = (url: string) => seerBackdrops.setBackdrop(url);
+const setBackdropImages = (urls: string[]) => seerBackdrops.setBackdropImages(urls);
 
 type ActiveTab = 'discovery' | 'search' | 'requests' | 'settings';
 

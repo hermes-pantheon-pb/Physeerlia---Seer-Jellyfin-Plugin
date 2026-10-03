@@ -4,6 +4,79 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
+.seerHeaderMuiBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    background-color: transparent !important;
+    outline: 0 !important;
+    border: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    vertical-align: middle !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms !important;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    &.active {
+        color: var(--jf-palette-primary-main, #00a4dc) !important;
+    }
+}
+
+.seerBackdropContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background-color: #121212;
+
+    .seerBackdropImage {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-size: cover;
+        background-position: center top;
+        opacity: 0;
+        transition: opacity 800ms ease-in-out;
+        will-change: opacity;
+        filter: brightness(0.38) saturate(1.15);
+
+        &.active {
+            opacity: 1;
+        }
+    }
+}
+
+#seerPluginRoot {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: var(--jf-palette-background-default, #121212);
+
+    &.withBackdrop {
+        background-color: transparent !important;
+    }
+}
+
 .seerContainer {
     padding-top: 1em;
     padding-bottom: 4em;

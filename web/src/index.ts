@@ -12,34 +12,39 @@ import './styles/seer.scss';
     let isSeerOpen = false;
 
     function openSeer() {
+        const header = document.querySelector('header');
+        const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 48;
+
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
             seerContainer.className = 'page type-interior seerPageRoot';
             seerContainer.style.position = 'fixed';
-            seerContainer.style.top = '0';
             seerContainer.style.left = '0';
-            seerContainer.style.width = '100vw';
-            seerContainer.style.height = '100vh';
-            seerContainer.style.zIndex = '9999';
-            seerContainer.style.backgroundColor = 'var(--jf-palette-background-default, #141414)';
+            seerContainer.style.right = '0';
+            seerContainer.style.bottom = '0';
+            seerContainer.style.zIndex = '1050';
             seerContainer.style.overflowY = 'auto';
             seerContainer.style.overflowX = 'hidden';
             document.body.appendChild(seerContainer);
         }
 
+        seerContainer.style.top = `${headerHeight}px`;
+        seerContainer.style.height = `calc(100vh - ${headerHeight}px)`;
         seerContainer.style.display = 'block';
-        document.body.style.overflow = 'hidden';
         isSeerOpen = true;
+
+        // Highlight header button when active
+        const btn = document.querySelector('[data-seer-btn="true"]');
+        if (btn) btn.classList.add('active');
 
         ReactDOM.render(React.createElement(SeerPage, { onClose: closeSeer }), seerContainer);
 
-        // Update URL hash without letting React Router crash on unknown path
         if (window.location.hash !== '#seer') {
             window.history.pushState({ seerOpen: true }, '', '#seer');
         }
 
-        console.debug('[SeerPlugin] Seer full-page view mounted');
+        console.debug('[SeerPlugin] Seer view mounted underneath top bar');
     }
 
     function closeSeer() {
@@ -47,42 +52,56 @@ import './styles/seer.scss';
             seerContainer.style.display = 'none';
             ReactDOM.unmountComponentAtNode(seerContainer);
         }
-        document.body.style.overflow = '';
         isSeerOpen = false;
 
-        // Restore clean URL if hash was #seer
+        // Unhighlight header button
+        const btn = document.querySelector('[data-seer-btn="true"]');
+        if (btn) btn.classList.remove('active');
+
         if (window.location.hash === '#seer') {
             window.history.back();
         }
-        console.debug('[SeerPlugin] Seer full-page view unmounted');
+        console.debug('[SeerPlugin] Seer view unmounted');
     }
 
     /**
      * Injects the Seer navigation icon into the visible header (Modern or Legacy)
      */
     function injectNavigation() {
-        // Prevent duplicate buttons
-        if (document.querySelector('[data-seer-btn="true"]')) {
-            return;
-        }
-
-        // 1. Modern Layout: Material-UI Toolbar in active header
+        // Modern Layout: Material-UI Toolbar in active header
         const modernToolbar = document.querySelector('header .MuiToolbar-root');
         if (modernToolbar) {
-            // Find the right-aligned button container (next to search / user button)
-            const rightContainer = modernToolbar.querySelector('.MuiBox-root[style*="flex-end"]') ||
-                                   modernToolbar.querySelector('button[aria-label*="user" i]')?.parentElement ||
-                                   modernToolbar;
+            // Locate the search button in the toolbar
+            const searchBtn = modernToolbar.querySelector('a[href*="/search"], a[aria-label*="Search" i], button[aria-label*="Search" i]');
+            const existingBtn = document.querySelector('[data-seer-btn="true"]');
+
+            if (existingBtn) {
+                // If it is already in the right place directly after search, nothing to do
+                if (searchBtn && existingBtn.previousElementSibling === searchBtn) {
+                    return;
+                }
+                // Otherwise remove misplaced button so it can be re-inserted correctly
+                existingBtn.remove();
+            }
+
+            // Clean up any stray duplicates
+            document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
 
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.setAttribute('data-seer-btn', 'true');
-            btn.className = 'MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
+            btn.id = 'headerSeerBtn';
+            btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
+            if (isSeerOpen) btn.classList.add('active');
             btn.title = 'Requests & Discovery (Seer)';
             btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
-            btn.style.margin = '0 2px';
-            btn.style.cursor = 'pointer';
-            btn.innerHTML = '<span class="material-icons travel_explore" aria-hidden="true" style="font-size: 24px; vertical-align: middle;">travel_explore</span>';
+
+            // Material-UI exact TravelExplore SVG icon
+            btn.innerHTML = `
+                <svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;">
+                    <path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5-4.5s-4.5 2-4.5 4.5 2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4-2.7-3.2zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.43-4.73-5.25v.25c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1h-2v2h6c.55 0 1 .45 1 1v1.17c-.61.5-1.07 1.16-1.34 1.83H12v2h2c0 .73.16 1.41.43 2.04l-.43.43V20z"></path>
+                </svg>
+            `;
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -94,34 +113,35 @@ import './styles/seer.scss';
                 }
             };
 
-            const userMenuBtn = modernToolbar.querySelector('button[aria-label*="user" i]') ||
-                                modernToolbar.querySelector('button[aria-label*="account" i]') ||
-                                modernToolbar.querySelector('[class*="UserMenuButton"]');
-
-            if (userMenuBtn && userMenuBtn.parentElement) {
-                userMenuBtn.parentElement.insertBefore(btn, userMenuBtn);
+            if (searchBtn && searchBtn.parentElement) {
+                // Insert on the right side of the regular search icon
+                searchBtn.insertAdjacentElement('afterend', btn);
             } else {
-                rightContainer.appendChild(btn);
+                // Fallback: inside right buttons container before user menu
+                const userBox = modernToolbar.querySelector('button[aria-label*="user" i]')?.closest('.MuiBox-root') ||
+                                modernToolbar.querySelector('button[aria-label*="user" i]');
+                if (userBox && userBox.parentElement) {
+                    userBox.parentElement.insertBefore(btn, userBox);
+                } else {
+                    modernToolbar.appendChild(btn);
+                }
             }
 
-            console.debug('[SeerPlugin] Injected Seer button into Modern Toolbar');
+            console.debug('[SeerPlugin] Injected single Seer button on the right side of Search icon');
             injectDrawerLink();
-            return; // Never proceed to legacy if modern toolbar was injected
+            return;
         }
 
-        // 2. Legacy Layout: only if no modern header exists
+        // Legacy Layout fallback
         const legacyHeader = document.querySelector('.skinHeader:not([class*="hide"]):not([style*="display: none"]) .headerRight');
         if (legacyHeader && !document.querySelector('[data-seer-btn="true"]')) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.setAttribute('data-seer-btn', 'true');
+            btn.id = 'headerSeerBtn';
             btn.className = 'headerButton headerButtonRight';
             btn.title = 'Requests & Discovery (Seer)';
             btn.innerHTML = '<span class="material-icons travel_explore" aria-hidden="true" style="font-size: 1.5em; vertical-align: middle;">travel_explore</span>';
-            btn.style.display = 'inline-flex';
-            btn.style.alignItems = 'center';
-            btn.style.justifyContent = 'center';
-            btn.style.cursor = 'pointer';
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -139,7 +159,6 @@ import './styles/seer.scss';
             } else {
                 legacyHeader.appendChild(btn);
             }
-            console.debug('[SeerPlugin] Injected Seer button into Legacy Header');
         }
 
         injectDrawerLink();
@@ -171,7 +190,6 @@ import './styles/seer.scss';
                 </div>
             `;
             modernList.appendChild(item);
-            console.debug('[SeerPlugin] Injected Seer link into Modern Drawer');
             return;
         }
 
@@ -189,19 +207,19 @@ import './styles/seer.scss';
             };
             link.innerHTML = '<span class="material-icons navMenuOptionIcon travel_explore" aria-hidden="true">travel_explore</span><span class="navMenuOptionText">Requests & Discovery</span>';
             legacyDrawer.appendChild(link);
-            console.debug('[SeerPlugin] Injected Seer link into Legacy Drawer');
         }
     }
 
     // Handle browser back button
-    window.addEventListener('popstate', (e) => {
+    window.addEventListener('popstate', () => {
         if (isSeerOpen) {
             if (seerContainer) {
                 seerContainer.style.display = 'none';
                 ReactDOM.unmountComponentAtNode(seerContainer);
             }
-            document.body.style.overflow = '';
             isSeerOpen = false;
+            const btn = document.querySelector('[data-seer-btn="true"]');
+            if (btn) btn.classList.remove('active');
         }
     });
 
@@ -210,16 +228,16 @@ import './styles/seer.scss';
         document.addEventListener('DOMContentLoaded', () => {
             injectNavigation();
             if (window.location.hash === '#seer') {
-                setTimeout(openSeer, 600);
+                setTimeout(openSeer, 500);
             }
         });
     } else {
         injectNavigation();
         if (window.location.hash === '#seer') {
-            setTimeout(openSeer, 600);
+            setTimeout(openSeer, 500);
         }
     }
 
     // Keep navigation icon active across React route changes
-    setInterval(injectNavigation, 1200);
+    setInterval(injectNavigation, 1000);
 })();
