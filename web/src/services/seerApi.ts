@@ -677,7 +677,7 @@ class SeerApiService {
             title: item.title || item.name || item.originalTitle || item.original_title || item.original_name || 'Unknown Title',
             overview: item.overview || '',
             posterPath: rawPoster
-                ? (rawPoster.startsWith('http') ? rawPoster : `https://image.tmdb.org/t/p/w500${rawPoster}`)
+                ? (rawPoster.startsWith('http') ? rawPoster : `https://image.tmdb.org/t/p/w300${rawPoster}`)
                 : '',
             backdropPath: rawBackdrop
                 ? (rawBackdrop.startsWith('http') ? rawBackdrop : `https://image.tmdb.org/t/p/w1280${rawBackdrop}`)

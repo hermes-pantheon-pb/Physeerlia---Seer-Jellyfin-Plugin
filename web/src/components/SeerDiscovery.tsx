@@ -125,51 +125,7 @@ export const SeerDiscovery: FC<SeerDiscoveryProps> = ({ onSelectMedia, onBackdro
         }
     }, [loadItems]);
 
-    // Throttled scroll listener fallback across window & inner scroll containers
-    useEffect(() => {
-        let ticking = false;
 
-        const handleScroll = (event: Event) => {
-            if (isFetchingRef.current || !hasMoreRef.current) return;
-
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    ticking = false;
-                    if (isFetchingRef.current || !hasMoreRef.current) return;
-
-                    // 1. Check window / document scroll
-                    const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-                    const windowHeight = window.innerHeight;
-                    const docHeight = Math.max(
-                        document.documentElement.scrollHeight,
-                        document.body.scrollHeight,
-                        document.getElementById('seerPage')?.scrollHeight || 0
-                    );
-
-                    if (docHeight > 0 && (docHeight - (scrollY + windowHeight)) < 800) {
-                        void loadItems(pageRef.current + 1, filterTypeRef.current, false);
-                        return;
-                    }
-
-                    // 2. Check inner scroll container if triggered by child
-                    const target = event.target as HTMLElement | null;
-                    if (target && target !== (document as any) && target !== (window as any) && typeof target.scrollHeight === 'number') {
-                        const remaining = target.scrollHeight - (target.scrollTop + target.clientHeight);
-                        if (remaining < 800) {
-                            void loadItems(pageRef.current + 1, filterTypeRef.current, false);
-                        }
-                    }
-                });
-                ticking = true;
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll, { capture: true });
-        };
-    }, [loadItems]);
 
     return (
         <div>

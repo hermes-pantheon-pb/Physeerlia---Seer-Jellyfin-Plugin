@@ -115,9 +115,13 @@ import './styles/seer.scss';
             const existingBtn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
 
             if (existingBtn) {
-                // If it is already in the right place directly after search, keep theme synced
+                // If it is already in the right place directly after search, quickly verify active state without reflow
                 if (searchBtn && existingBtn.previousElementSibling === searchBtn) {
-                    syncButtonTheme(existingBtn, searchBtn);
+                    if (isSeerOpen && !existingBtn.classList.contains('active')) {
+                        existingBtn.classList.add('active');
+                    } else if (!isSeerOpen && existingBtn.classList.contains('active')) {
+                        existingBtn.classList.remove('active');
+                    }
                     return;
                 }
                 // Otherwise remove misplaced button so it can be re-inserted correctly
