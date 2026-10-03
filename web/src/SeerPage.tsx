@@ -45,7 +45,11 @@ const { clearBackdrop, setBackdrop, setBackdropImages } = getBackdrop();
 
 type ActiveTab = 'discovery' | 'search' | 'requests' | 'settings';
 
-export const SeerPage: FC = () => {
+interface SeerPageProps {
+    onClose?: () => void;
+}
+
+export const SeerPage: FC<SeerPageProps> = ({ onClose }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(seerApi.isAuthenticated());
     const [activeTab, setActiveTab] = useState<ActiveTab>('discovery');
     const [selectedMediaForDetail, setSelectedMediaForDetail] = useState<SeerMediaItem | null>(null);
@@ -161,6 +165,29 @@ export const SeerPage: FC = () => {
                 {/* Header bar */}
                 <div className='seerHeaderBar'>
                     <div className='seerTitleSection'>
+                        {onClose && (
+                            <button
+                                type='button'
+                                onClick={onClose}
+                                className='seerBackButton'
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                                    color: 'var(--jf-palette-text-primary, #fff)',
+                                    borderRadius: '50%',
+                                    width: '38px',
+                                    height: '38px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    marginRight: '0.4em'
+                                }}
+                                title='Back to Jellyfin'
+                            >
+                                <span className='material-icons' style={{ fontSize: '20px' }}>arrow_back</span>
+                            </button>
+                        )}
                         <span className='material-icons seerIcon'>travel_explore</span>
                         <div>
                             <h1>Seer</h1>
