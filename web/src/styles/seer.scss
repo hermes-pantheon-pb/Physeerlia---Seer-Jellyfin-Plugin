@@ -1,0 +1,1342 @@
+/**
+ * Seer Integration Styles
+ * Automatically hooks into all installed and delegated Jellyfin themes via standard
+ * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
+ */
+
+.seerContainer {
+    padding-top: 1em;
+    padding-bottom: 4em;
+    color: var(--jf-palette-text-primary, #fff);
+    min-height: calc(100vh - 4.5em);
+    background: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+.seerHeaderBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    margin-bottom: 1.5em;
+    padding-bottom: 0.8em;
+    border-bottom: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.12));
+}
+
+.seerTitleSection {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+
+    .seerIcon {
+        font-size: 2.2em;
+        color: var(--jf-palette-primary-main, #00a4dc);
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 1.75em;
+        font-weight: 600;
+        color: var(--jf-palette-text-primary, #fff);
+    }
+
+    .seerSubtitle {
+        font-size: 0.9em;
+        color: var(--jf-palette-text-secondary, #aaa);
+    }
+}
+
+.seerRoleBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.35em 0.85em;
+    border-radius: var(--jf-card-borderRadius, 0.25em);
+    background-color: var(--jf-palette-background-paper, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.15));
+    font-size: 0.85em;
+    color: var(--jf-palette-text-secondary, #ddd);
+
+    .roleDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--jf-palette-primary-main, #00a4dc);
+    }
+}
+
+/* Tab Bar */
+.seerTabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5em;
+    margin-bottom: 2em;
+    border-bottom: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.1));
+    padding-bottom: 0.25em;
+
+    .seerTabButton {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4em;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--jf-palette-text-primary, #ffffff);
+        opacity: 0.75;
+        padding: 0.75em 1.25em;
+        font-size: 1.05em;
+        font-weight: 500;
+        cursor: pointer;
+        position: relative;
+        border-radius: var(--jf-card-borderRadius, 0.2em) var(--jf-card-borderRadius, 0.2em) 0 0;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: var(--jf-palette-text-primary, #ffffff);
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        &.active {
+            color: var(--jf-palette-primary-main, #00a4dc);
+            opacity: 1;
+            font-weight: 600;
+
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: -0.25em;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background-color: var(--jf-palette-primary-main, #00a4dc);
+                border-radius: 2px 2px 0 0;
+            }
+        }
+    }
+}
+
+/* Media Cards Grid */
+.seerMediaGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5em 1.2em;
+    margin-bottom: 3em;
+
+    @media (max-width: 600px) {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1em 0.8em;
+    }
+}
+
+.seerMediaCard {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    content-visibility: auto;
+    contain-intrinsic-size: 200px 320px;
+
+    &:hover {
+        transform: translateY(-4px) scale(1.02);
+
+        .cardImage {
+            filter: brightness(1.08);
+        }
+    }
+
+    .cardBox {
+        position: relative;
+        border-radius: var(--jf-card-borderRadius, 0.3em);
+        overflow: hidden;
+        background-color: var(--jf-palette-background-paper, #202020);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+
+    .cardScalable {
+        position: relative;
+        width: 100%;
+        padding-top: 150%; /* 2:3 aspect ratio */
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        overflow: hidden;
+    }
+
+    .cardImageContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        overflow: hidden;
+    }
+
+    .cardImage {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        transition: filter 0.2s ease;
+    }
+
+    .cardImagePlaceholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        color: var(--jf-palette-text-secondary, #777);
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    .cardFooter {
+        padding: 0.75em 0.5em;
+        background-color: transparent !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom-left-radius: inherit;
+        border-bottom-right-radius: inherit;
+    }
+
+    .cardTitle {
+        font-weight: 600;
+        font-size: 0.95em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--jf-palette-text-primary, #fff);
+    }
+
+    .cardSubText {
+        font-size: 0.82em;
+        color: var(--jf-palette-text-secondary, #aaa);
+        margin-top: 0.2em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Badges */
+.seerBadge {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    padding: 0.25em 0.6em;
+    border-radius: var(--jf-card-borderRadius, 0.2em);
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+
+    &.statusAvailable {
+        background-color: #2e7d32;
+        color: #fff;
+    }
+
+    &.statusPending {
+        background-color: #ed6c02;
+        color: #fff;
+    }
+
+    &.statusProcessing {
+        background-color: #0288d1;
+        color: #fff;
+    }
+
+    &.statusPartiallyAvailable {
+        background-color: #7b1fa2;
+        color: #fff;
+    }
+
+    &.badge4k {
+        top: 0.5em;
+        left: 0.5em;
+        right: auto;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #000;
+        font-weight: 700;
+    }
+}
+
+/* Search Bar */
+.seerSearchBox {
+    position: relative;
+    max-width: 650px;
+    margin: 0 auto 2.5em;
+
+    .seerSearchInput {
+        width: 100%;
+        padding: 0.85em 1em 0.85em 3.2em;
+        font-size: 1.1em;
+        background-color: var(--jf-palette-background-paper, rgba(255, 255, 255, 0.08));
+        border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.15));
+        border-radius: var(--jf-card-borderRadius, 0.4em);
+        color: var(--jf-palette-text-primary, #fff);
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:focus {
+            border-color: var(--jf-palette-primary-main, #00a4dc);
+            box-shadow: 0 0 0 2px rgba(0, 164, 220, 0.25);
+        }
+    }
+
+    .seerSearchIcon {
+        position: absolute;
+        left: 1em;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--jf-palette-text-secondary, #888);
+        pointer-events: none;
+    }
+
+    .seerSearchClear {
+        position: absolute;
+        right: 0.8em;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--jf-palette-text-secondary, #888);
+        cursor: pointer;
+
+        &:hover {
+            color: var(--jf-palette-text-primary, #fff);
+        }
+    }
+}
+
+/* Modals */
+.seerModalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: calc(4.5em + env(safe-area-inset-top, 0px));
+    padding-bottom: 2em;
+    padding-left: 1em;
+    padding-right: 1em;
+    box-sizing: border-box;
+    overflow-y: auto;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.seerModalContent {
+    background-color: var(--jf-palette-background-paper, #1e1e1e);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.12));
+    border-radius: var(--jf-card-borderRadius, 0.4em);
+    width: 100%;
+    max-width: 640px;
+    max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px));
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 0;
+
+    form {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .seerModalHeader {
+        flex-shrink: 0;
+    }
+
+    .seerModalBody {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .seerModalFooter {
+        flex-shrink: 0;
+    }
+}
+
+.seerModalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25em 1.5em;
+    border-bottom: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.1));
+
+    h2 {
+        margin: 0;
+        font-size: 1.3em;
+        color: var(--jf-palette-text-primary, #fff);
+    }
+
+    .closeButton {
+        background: transparent;
+        border: none;
+        color: var(--jf-palette-text-primary, #ffffff);
+        cursor: pointer;
+        font-size: 1.6em;
+        line-height: 1;
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.15s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--jf-palette-primary-main, #00a4dc);
+        }
+    }
+}
+
+.seerModalBody {
+    padding: 1.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+}
+
+.seerMediaSummary {
+    display: flex;
+    gap: 1.2em;
+
+    .modalPoster {
+        width: 100px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: var(--jf-card-borderRadius, 0.25em);
+        flex-shrink: 0;
+    }
+
+    .modalOverview {
+        font-size: 0.9em;
+        line-height: 1.45;
+        color: var(--jf-palette-text-secondary, #bbb);
+        max-height: 110px;
+        overflow-y: auto;
+    }
+}
+
+/* Delegation Form Controls */
+.seerFormGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+
+    label {
+        font-size: 0.9em;
+        font-weight: 600;
+        color: var(--jf-palette-text-secondary, #bbb);
+    }
+
+    select, input[type="text"] {
+        padding: 0.7em 0.9em;
+        background-color: var(--jf-palette-background-default, rgba(0, 0, 0, 0.3));
+        border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.15));
+        border-radius: var(--jf-card-borderRadius, 0.25em);
+        color: var(--jf-palette-text-primary, #fff);
+        font-size: 0.95em;
+        outline: none;
+
+        &:focus {
+            border-color: var(--jf-palette-primary-main, #00a4dc);
+        }
+    }
+
+    .helperText {
+        font-size: 0.8em;
+        color: var(--jf-palette-text-secondary, #888);
+    }
+}
+
+.seerToggleGroup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8em 1em;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.08));
+    border-radius: var(--jf-card-borderRadius, 0.3em);
+
+    .toggleLabel {
+        font-weight: 500;
+        color: var(--jf-palette-text-primary, #fff);
+    }
+
+    .toggleDesc {
+        font-size: 0.8em;
+        color: var(--jf-palette-text-secondary, #aaa);
+    }
+}
+
+/* Season Checkbox List */
+.seerSeasonsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0.5em;
+    background-color: var(--jf-palette-background-default, rgba(0, 0, 0, 0.25));
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.08));
+    border-radius: var(--jf-card-borderRadius, 0.25em);
+
+    .seasonItem {
+        display: flex;
+        align-items: center;
+        gap: 0.75em;
+        padding: 0.4em 0.6em;
+        border-radius: var(--jf-card-borderRadius, 0.2em);
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--jf-palette-primary-main, #00a4dc);
+            width: 1.1em;
+            height: 1.1em;
+        }
+
+        .seasonName {
+            font-weight: 500;
+            color: var(--jf-palette-text-primary, #fff);
+        }
+
+        .seasonEpisodes {
+            font-size: 0.82em;
+            color: var(--jf-palette-text-secondary, #888);
+            margin-left: auto;
+        }
+    }
+}
+
+.seerModalFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.8em;
+    padding: 1.25em 1.5em;
+    border-top: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.1));
+    background-color: rgba(0, 0, 0, 0.15);
+
+    .submitBtn {
+        background-color: var(--jf-palette-primary-main, #00a4dc);
+        color: var(--jf-palette-primary-contrastText, #fff);
+        border: none;
+        padding: 0.7em 1.4em;
+        border-radius: var(--jf-card-borderRadius, 0.25em);
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: var(--jf-palette-primary-hover, #008fbf);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    .cancelBtn {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--jf-palette-text-primary, #ffffff);
+        border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.22));
+        padding: 0.7em 1.3em;
+        border-radius: var(--jf-card-borderRadius, 0.25em);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.18s ease;
+
+        &:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+    }
+}
+
+/* Requests List Table / Cards */
+.seerRequestsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.seerRequestCard {
+    display: flex;
+    align-items: center;
+    gap: 1.2em;
+    padding: 1em 1.25em;
+    background-color: var(--jf-palette-background-paper, #202020);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.08));
+    border-radius: var(--jf-card-borderRadius, 0.3em);
+    transition: transform 0.15s ease;
+
+    @media (max-width: 700px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .requestPoster {
+        width: 60px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: var(--jf-card-borderRadius, 0.2em);
+        flex-shrink: 0;
+    }
+
+    .requestDetails {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25em;
+
+        .requestTitle {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--jf-palette-text-primary, #fff);
+        }
+
+        .requestMeta {
+            font-size: 0.85em;
+            color: var(--jf-palette-text-secondary, #aaa);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75em;
+        }
+
+        .requestDelegation {
+            font-size: 0.8em;
+            color: var(--jf-palette-primary-main, #00a4dc);
+            margin-top: 0.2em;
+        }
+    }
+
+    .requestActions {
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+
+        @media (max-width: 700px) {
+            margin-top: 0.5em;
+            align-self: flex-end;
+        }
+
+        .btnApprove {
+            background-color: #2e7d32;
+            color: #ffffff;
+            border: 1px solid #388e3c;
+            padding: 0.45em 0.85em;
+            border-radius: var(--jf-card-borderRadius, 0.2em);
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(46, 125, 50, 0.3);
+            transition: all 0.15s ease;
+
+            &:hover {
+                background-color: #1b5e20;
+                box-shadow: 0 3px 8px rgba(46, 125, 50, 0.45);
+            }
+        }
+
+        .btnDecline {
+            background-color: #d32f2f;
+            color: #ffffff;
+            border: 1px solid #e53935;
+            padding: 0.45em 0.85em;
+            border-radius: var(--jf-card-borderRadius, 0.2em);
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(211, 47, 47, 0.3);
+            transition: all 0.15s ease;
+
+            &:hover {
+                background-color: #b71c1c;
+                box-shadow: 0 3px 8px rgba(211, 47, 47, 0.45);
+            }
+        }
+
+        .btnDelete {
+            background: rgba(255, 152, 0, 0.12);
+            color: #ffb74d;
+            border: 1px solid rgba(255, 152, 0, 0.35);
+            padding: 0.45em 0.75em;
+            border-radius: var(--jf-card-borderRadius, 0.2em);
+            font-size: 0.85em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+
+            &:hover {
+                background: rgba(255, 152, 0, 0.25);
+                color: #ffffff;
+                border-color: #ff9800;
+            }
+        }
+    }
+}
+
+/* =========================================================================
+   High-Contrast Themed Button System
+   ========================================================================= */
+
+/* Filter & Option Toggle Buttons (Pills, Season Selectors, Search & Discovery Filters) */
+.seerFilterBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45em;
+    padding: 0.55em 1.05em;
+    font-size: 0.88em;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: var(--jf-card-borderRadius, 0.3em);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.22));
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--jf-palette-text-primary, #ffffff) !important;
+    cursor: pointer;
+    transition: all 0.18s ease-in-out;
+    text-decoration: none;
+    user-select: none;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.18) !important;
+        border-color: var(--jf-palette-divider, rgba(255, 255, 255, 0.4)) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--jf-palette-primary-main, #00a4dc);
+        outline-offset: 2px;
+    }
+
+    &.active {
+        background: var(--jf-palette-primary-main, #00a4dc) !important;
+        color: var(--jf-palette-primary-contrastText, #ffffff) !important;
+        border-color: var(--jf-palette-primary-main, #00a4dc) !important;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(0, 164, 220, 0.4);
+
+        &:hover {
+            filter: brightness(1.1);
+            background: var(--jf-palette-primary-main, #00a4dc) !important;
+            border-color: var(--jf-palette-primary-main, #00a4dc) !important;
+            box-shadow: 0 4px 14px rgba(0, 164, 220, 0.5);
+        }
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+/* Secondary Action Button (e.g. Refresh, Test Connection) */
+.seerActionBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    padding: 0.55em 1em;
+    font-size: 0.88em;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: var(--jf-card-borderRadius, 0.3em);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.22));
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--jf-palette-text-primary, #ffffff);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    outline: none;
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
+
+/* Sign Out Action Button */
+.seerSignOutBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.4em 0.85em;
+    font-size: 0.84em;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: var(--jf-card-borderRadius, 0.25em);
+    background: rgba(211, 47, 47, 0.12);
+    border: 1px solid rgba(211, 47, 47, 0.35);
+    color: #ff8a80 !important;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    outline: none;
+    line-height: 1.2;
+
+    &:hover {
+        background: rgba(211, 47, 47, 0.25);
+        border-color: #e53935;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(211, 47, 47, 0.35);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+/* Text link helper buttons (Select All, Clear All) */
+.seerTextBtn {
+    background: transparent;
+    border: none;
+    color: var(--jf-palette-primary-main, #00a4dc);
+    cursor: pointer;
+    padding: 0.2em 0.4em;
+    font-size: inherit;
+    font-weight: 600;
+    border-radius: 3px;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        text-decoration: underline;
+    }
+
+    &.muted {
+        color: var(--jf-palette-text-secondary, #aaa);
+
+        &:hover {
+            color: var(--jf-palette-text-primary, #ffffff);
+        }
+    }
+}
+
+/* Icon toggle button (e.g. Expand/Collapse episode drawer) */
+.seerIconButton {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.15));
+    color: var(--jf-palette-text-primary, #ffffff);
+    cursor: pointer;
+    padding: 0.25em 0.45em;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.16);
+        color: var(--jf-palette-primary-main, #00a4dc);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Global Safety Overrides: prevent any Jellyfin emby-button from appearing washed out inside Seer */
+.seerContainer,
+.seerModalContent {
+    .emby-button.raised,
+    .emby-button.emby-button-raised {
+        background: var(--jf-palette-primary-main, #00a4dc) !important;
+        color: var(--jf-palette-primary-contrastText, #ffffff) !important;
+        border: 1px solid var(--jf-palette-primary-main, #00a4dc) !important;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 164, 220, 0.35);
+
+        &:hover {
+            filter: brightness(1.1);
+        }
+    }
+
+    .emby-button:not(.raised):not(.emby-button-raised):not(.button-submit):not(.button-cancel):not(.button-delete):not(.seerFilterBtn):not(.seerActionBtn) {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--jf-palette-text-primary, #ffffff) !important;
+        border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.22));
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #ffffff !important;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* =========================================================================
+   Base Settings Card
+   ========================================================================= */
+.seerSettingsCard {
+    background-color: var(--jf-palette-background-paper, #202020);
+    border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.08));
+    border-radius: var(--jf-card-borderRadius, 0.3em);
+    transition: all 0.25s ease;
+}
+
+/* =========================================================================
+   Abyss Translucent Frosted Glass UI System (Toggleable)
+   Matches the frosted glass, smooth blur & pill button aesthetic of Abyss
+   ========================================================================= */
+
+.seerGlassTheme {
+    --seer-glass-tint: var(--abyss-glass-tint, 32, 32, 36);
+    --seer-glass-blur: var(--abyss-glass-blur, 15px);
+    --seer-glass-backdrop-blur: var(--abyss-backdrop-blur, 22px);
+    --seer-accent: var(--abyss-accent, 245, 245, 247);
+    --seer-radius: var(--abyss-radius, 12px);
+    --seer-ease: var(--abyss-ease, cubic-bezier(0.16, 1, 0.3, 1));
+
+    /* Frosted Pill Navigation Tab Bar */
+    .seerTabs {
+        background: rgba(var(--seer-glass-tint), 0.45) !important;
+        backdrop-filter: blur(var(--seer-glass-blur)) !important;
+        -webkit-backdrop-filter: blur(var(--seer-glass-blur)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 50px !important;
+        padding: 5px !important;
+        display: inline-flex !important;
+        width: fit-content !important;
+        max-width: 100% !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+
+        .seerTabButton {
+            border-radius: 50px !important;
+            padding: 0.55em 1.35em !important;
+            border: none !important;
+            background: transparent !important;
+            color: rgba(var(--seer-accent), 0.8) !important;
+            transition: all 0.25s var(--seer-ease) !important;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.12) !important;
+                color: #ffffff !important;
+            }
+
+            &.active {
+                background: rgba(var(--seer-accent), 0.95) !important;
+                color: #121212 !important;
+                font-weight: 600 !important;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+
+                &::after {
+                    display: none !important;
+                }
+            }
+        }
+    }
+
+    /* Frosted Glass Filter & Option Buttons */
+    .seerFilterBtn {
+        background: rgba(var(--seer-glass-tint), 0.52) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border: 1px solid rgba(245, 245, 247, 0.16) !important;
+        border-radius: var(--seer-radius) !important;
+        color: rgba(var(--seer-accent), 0.92) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover:not(:disabled) {
+            background: rgba(var(--seer-accent), 0.18) !important;
+            border-color: rgba(var(--seer-accent), 0.4) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        &.active {
+            background: rgba(var(--seer-accent), 0.95) !important;
+            color: #121212 !important;
+            border-color: rgba(var(--seer-accent), 1) !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+
+            &:hover {
+                background: #ffffff !important;
+                color: #000000 !important;
+                transform: translateY(-2px) !important;
+            }
+        }
+    }
+
+    /* Frosted Glass Action & Control Buttons */
+    .seerActionBtn {
+        background: rgba(var(--seer-glass-tint), 0.52) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border: 1px solid rgba(245, 245, 247, 0.16) !important;
+        border-radius: var(--seer-radius) !important;
+        color: #ffffff !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            transform: translateY(-1px) !important;
+        }
+    }
+
+    .seerSignOutBtn {
+        background: rgba(249, 38, 114, 0.18) !important;
+        border: 1px solid rgba(249, 38, 114, 0.38) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-radius: 50px !important;
+        color: #ff6b9d !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover {
+            background: rgba(249, 38, 114, 0.32) !important;
+            border-color: #f92672 !important;
+            color: #ffffff !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 14px rgba(249, 38, 114, 0.4) !important;
+        }
+    }
+
+    .seerRoleBadge {
+        background: rgba(var(--seer-glass-tint), 0.55) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(245, 245, 247, 0.16) !important;
+        border-radius: 50px !important;
+        color: rgb(var(--seer-accent)) !important;
+    }
+
+    /* Frosted Panels, Cards & Settings */
+    .seerSettingsCard,
+    .seerRequestCard {
+        background-color: rgba(var(--seer-glass-tint), 0.6) !important;
+        backdrop-filter: blur(var(--seer-glass-blur)) !important;
+        -webkit-backdrop-filter: blur(var(--seer-glass-blur)) !important;
+        border: 1px solid rgba(245, 245, 247, 0.13) !important;
+        border-radius: var(--seer-radius) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover {
+            border-color: rgba(245, 245, 247, 0.24) !important;
+        }
+    }
+
+    .seerMediaCard {
+        .cardBox {
+            background-color: rgba(var(--seer-glass-tint), 0.62) !important;
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: var(--seer-radius) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+            overflow: hidden !important;
+        }
+
+        .cardScalable,
+        .cardImageContainer,
+        .cardImage {
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        .cardFooter {
+            background: transparent !important;
+            background-color: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+    }
+
+    .seerSearchInput {
+        background-color: rgba(var(--seer-glass-tint), 0.55) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border-radius: var(--seer-radius) !important;
+
+        &:focus {
+            border-color: rgba(var(--seer-accent), 0.6) !important;
+            box-shadow: 0 0 0 2px rgba(var(--seer-accent), 0.2) !important;
+        }
+    }
+
+    /* Frosted Request Actions & Approval Buttons */
+    .btnApprove {
+        background: rgba(46, 125, 50, 0.45) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(76, 175, 80, 0.45) !important;
+        border-radius: var(--seer-radius) !important;
+        color: #ffffff !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover {
+            background: rgba(46, 125, 50, 0.75) !important;
+            border-color: rgba(76, 175, 80, 0.75) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.4) !important;
+        }
+    }
+
+    .btnDecline {
+        background: rgba(211, 47, 47, 0.45) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(244, 67, 54, 0.45) !important;
+        border-radius: var(--seer-radius) !important;
+        color: #ffffff !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover {
+            background: rgba(211, 47, 47, 0.75) !important;
+            border-color: rgba(244, 67, 54, 0.75) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 14px rgba(211, 47, 47, 0.4) !important;
+        }
+    }
+
+    .btnDelete {
+        background: rgba(255, 152, 0, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 152, 0, 0.35) !important;
+        border-radius: var(--seer-radius) !important;
+        color: #ffb74d !important;
+        transition: all 0.25s var(--seer-ease) !important;
+
+        &:hover {
+            background: rgba(255, 152, 0, 0.3) !important;
+            border-color: #ff9800 !important;
+            color: #ffffff !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 14px rgba(255, 152, 0, 0.3) !important;
+        }
+    }
+
+    /* Frosted Badges */
+    .seerBadge {
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border-radius: 50px !important;
+
+        &.statusAvailable {
+            background: rgba(46, 125, 50, 0.6) !important;
+            border: 1px solid rgba(76, 175, 80, 0.5) !important;
+        }
+
+        &.statusProcessing {
+            background: rgba(2, 136, 209, 0.6) !important;
+            border: 1px solid rgba(3, 169, 244, 0.5) !important;
+        }
+
+        &.statusPending {
+            background: rgba(237, 108, 2, 0.6) !important;
+            border: 1px solid rgba(255, 152, 0, 0.5) !important;
+        }
+    }
+
+    .seerIconButton {
+        background: rgba(var(--seer-glass-tint), 0.5) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        transition: all 0.2s var(--seer-ease) !important;
+
+        &:hover {
+            background: rgba(var(--seer-accent), 0.2) !important;
+            border-color: rgba(var(--seer-accent), 0.5) !important;
+        }
+    }
+
+    .seerTextBtn {
+        color: rgba(var(--seer-accent), 0.9) !important;
+        border-radius: 4px !important;
+        padding: 0.2em 0.5em !important;
+        transition: all 0.2s ease !important;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+        }
+
+        &.muted {
+            color: rgba(var(--seer-accent), 0.55) !important;
+
+            &:hover {
+                color: #ffffff !important;
+                background: rgba(255, 255, 255, 0.1) !important;
+            }
+        }
+    }
+
+    .seerSeasonPreviewCard {
+        background-color: rgba(var(--seer-glass-tint), 0.52) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: var(--seer-radius) !important;
+        transition: all 0.2s var(--seer-ease) !important;
+
+        &:hover {
+            background-color: rgba(var(--seer-glass-tint), 0.7) !important;
+            border-color: rgba(255, 255, 255, 0.25) !important;
+        }
+    }
+
+    /* Frosted Modals & Dialogs */
+    &.seerModalBackdrop,
+    .seerModalBackdrop {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        align-items: flex-start !important;
+        padding-top: calc(4.5em + env(safe-area-inset-top, 0px)) !important;
+        padding-bottom: 2em !important;
+        overflow-y: auto !important;
+    }
+
+    .seerModalContent,
+    &.seerModalContent {
+        background-color: rgba(var(--seer-glass-tint), 0.72) !important;
+        backdrop-filter: blur(var(--seer-glass-backdrop-blur)) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(var(--seer-glass-backdrop-blur)) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border-radius: calc(var(--seer-radius) + 2px) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px)) !important;
+        overflow: hidden !important;
+        margin-top: 0 !important;
+
+        form {
+            display: flex !important;
+            flex-direction: column !important;
+            flex: 1 !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .seerModalHeader {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            flex-shrink: 0 !important;
+        }
+
+        .seerModalBody {
+            flex: 1 !important;
+            min-height: 0 !important;
+            overflow-y: auto !important;
+        }
+
+        .seerModalFooter {
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background-color: rgba(0, 0, 0, 0.25) !important;
+            border-radius: 0 0 calc(var(--seer-radius) + 2px) calc(var(--seer-radius) + 2px) !important;
+            flex-shrink: 0 !important;
+        }
+
+        .submitBtn {
+            background: rgba(var(--seer-accent), 0.95) !important;
+            color: #121212 !important;
+            border: 1px solid rgba(var(--seer-accent), 1) !important;
+            border-radius: var(--seer-radius) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            font-weight: 600 !important;
+            transition: all 0.25s var(--seer-ease) !important;
+
+            &:hover:not(:disabled) {
+                background: #ffffff !important;
+                color: #000000 !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+            }
+        }
+
+        .cancelBtn {
+            background: rgba(var(--seer-glass-tint), 0.5) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: var(--seer-radius) !important;
+            color: #ffffff !important;
+            transition: all 0.25s var(--seer-ease) !important;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.2) !important;
+                border-color: rgba(255, 255, 255, 0.35) !important;
+            }
+        }
+
+        select, input[type="text"] {
+            background-color: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            border-radius: 8px !important;
+
+            &:focus {
+                border-color: rgba(var(--seer-accent), 0.6) !important;
+            }
+        }
+
+        .seerToggleGroup {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: var(--seer-radius) !important;
+        }
+
+        .seerSeasonsList {
+            background-color: rgba(0, 0, 0, 0.35) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 8px !important;
+        }
+    }
+}
+

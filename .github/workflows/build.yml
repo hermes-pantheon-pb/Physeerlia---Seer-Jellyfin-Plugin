@@ -1,0 +1,58 @@
+name: Build and Package Plugin
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build Plugin & Web Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: web/package.json
+
+      - name: Install Frontend Dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Build Web Bundle
+        working-directory: web
+        run: npm run build
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore src/Jellyfin.Plugin.Seer/Jellyfin.Plugin.Seer.csproj
+
+      - name: Build .NET Plugin
+        run: dotnet build src/Jellyfin.Plugin.Seer/Jellyfin.Plugin.Seer.csproj -c Release --no-restore
+
+      - name: Package Plugin Artifacts
+        run: |
+          mkdir -p dist/package
+          cp src/Jellyfin.Plugin.Seer/bin/Release/net8.0/Jellyfin.Plugin.Seer.dll dist/package/
+          cd dist/package
+          zip -r ../../jellyfin-plugin-seer.zip .
+          cd ../..
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jellyfin-plugin-seer
+          path: jellyfin-plugin-seer.zip
+          retention-days: 14
