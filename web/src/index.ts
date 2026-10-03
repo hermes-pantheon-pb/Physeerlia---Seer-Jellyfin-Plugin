@@ -11,6 +11,59 @@ import './styles/seer.scss';
     let seerContainer: HTMLElement | null = null;
     let isSeerOpen = false;
 
+    /**
+     * Dynamically synchronizes the Seer icon button styling with the active Jellyfin theme.
+     * Accurately infers color, opacity, and sizing from neighboring toolbar icons.
+     */
+    function syncButtonTheme(btn: HTMLElement, refBtn: HTMLElement | null) {
+        if (!btn) return;
+
+        if (isSeerOpen) {
+            btn.classList.add('active');
+            btn.style.setProperty('color', 'var(--jf-palette-primary-main, #00a4dc)', 'important');
+            btn.style.setProperty('opacity', '1', 'important');
+            return;
+        }
+
+        btn.classList.remove('active');
+
+        let sampledColor = '';
+        let sampledOpacity = '';
+
+        // Prioritize adjacent search button, otherwise check any other active header icon
+        const candidates = [
+            refBtn?.querySelector('svg'),
+            refBtn,
+            document.querySelector('header a.MuiIconButton-colorInherit:not([data-seer-btn]) svg'),
+            document.querySelector('header button.MuiIconButton-colorInherit:not([data-seer-btn]) svg'),
+            document.querySelector('header .MuiIconButton-root:not([data-seer-btn]) svg'),
+            document.querySelector('header .MuiIconButton-root:not([data-seer-btn])')
+        ].filter(Boolean) as HTMLElement[];
+
+        for (const el of candidates) {
+            // Skip disabled elements as they may have diminished opacity
+            if (el.closest('[disabled]') || el.closest('[aria-disabled="true"]')) {
+                continue;
+            }
+            const comp = window.getComputedStyle(el);
+            const color = comp.color;
+            if (color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
+                sampledColor = color;
+                sampledOpacity = comp.opacity || '1';
+                break;
+            }
+        }
+
+        if (sampledColor) {
+            btn.style.setProperty('color', sampledColor, 'important');
+            btn.style.setProperty('opacity', sampledOpacity, 'important');
+        } else {
+            // Fallback to Jellyfin theme secondary text variable
+            btn.style.setProperty('color', 'var(--jf-palette-text-secondary, rgba(255, 255, 255, 0.7))', 'important');
+            btn.style.setProperty('opacity', '1', 'important');
+        }
+    }
+
     function openSeer() {
         const header = document.querySelector('header');
         const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 48;
@@ -34,11 +87,12 @@ import './styles/seer.scss';
         seerContainer.style.display = 'block';
         isSeerOpen = true;
 
-        // Highlight header button when active
-        const btn = document.querySelector('[data-seer-btn="true"]');
-        if (btn) btn.classList.add('active');
+        // Update button active state & styling
+        const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
+        const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i]') as HTMLElement;
+        if (btn) syncButtonTheme(btn, searchBtn);
 
-        ReactDOM.render(React.createElement(SeerPage, { onClose: closeSeer }), seerContainer);
+        ReactDOM.render(React.createElement(SeerPage, { onClose: () => closeSeer(true) }), seerContainer);
 
         if (window.location.hash !== '#seer') {
             window.history.pushState({ seerOpen: true }, '', '#seer');
@@ -47,18 +101,23 @@ import './styles/seer.scss';
         console.debug('[SeerPlugin] Seer view mounted underneath top bar');
     }
 
-    function closeSeer() {
+    function closeSeer(revertHistory = true) {
         if (seerContainer) {
             seerContainer.style.display = 'none';
             ReactDOM.unmountComponentAtNode(seerContainer);
         }
         isSeerOpen = false;
 
-        // Unhighlight header button
-        const btn = document.querySelector('[data-seer-btn="true"]');
-        if (btn) btn.classList.remove('active');
+        // Reset button active state & styling
+        const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
+        const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i]') as HTMLElement;
+        if (btn) syncButtonTheme(btn, searchBtn);
 
-        if (window.location.hash === '#seer') {
+        // Remove withBackdrop from native background container if present
+        const jfBackground = document.querySelector('.backgroundContainer');
+        if (jfBackground) jfBackground.classList.remove('withBackdrop');
+
+        if (revertHistory && window.location.hash === '#seer') {
             window.history.back();
         }
         console.debug('[SeerPlugin] Seer view unmounted');
@@ -72,12 +131,13 @@ import './styles/seer.scss';
         const modernToolbar = document.querySelector('header .MuiToolbar-root');
         if (modernToolbar) {
             // Locate the search button in the toolbar
-            const searchBtn = modernToolbar.querySelector('a[href*="/search"], a[aria-label*="Search" i], button[aria-label*="Search" i]');
-            const existingBtn = document.querySelector('[data-seer-btn="true"]');
+            const searchBtn = modernToolbar.querySelector('a[href*="/search"], a[aria-label*="Search" i], button[aria-label*="Search" i]') as HTMLElement;
+            const existingBtn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
 
             if (existingBtn) {
-                // If it is already in the right place directly after search, nothing to do
+                // If it is already in the right place directly after search, keep theme synced
                 if (searchBtn && existingBtn.previousElementSibling === searchBtn) {
+                    syncButtonTheme(existingBtn, searchBtn);
                     return;
                 }
                 // Otherwise remove misplaced button so it can be re-inserted correctly
@@ -91,30 +151,54 @@ import './styles/seer.scss';
             btn.type = 'button';
             btn.setAttribute('data-seer-btn', 'true');
             btn.id = 'headerSeerBtn';
-            btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
-            if (isSeerOpen) btn.classList.add('active');
+
+            // Inherit exact classes from search button so MUI/Emotion themes style it identically
+            if (searchBtn) {
+                btn.className = `seerHeaderMuiBtn ${searchBtn.className}`;
+            } else {
+                btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
+            }
+
             btn.title = 'Requests & Discovery (Seer)';
             btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
 
-            // Material-UI exact TravelExplore SVG icon
+            const searchSvg = searchBtn?.querySelector('svg');
+            const svgClass = searchSvg ? searchSvg.getAttribute('class') || 'MuiSvgIcon-root MuiSvgIcon-fontSizeMedium' : 'MuiSvgIcon-root MuiSvgIcon-fontSizeMedium';
+
+            // Material-UI exact TravelExplore SVG icon with inferred svg styling
             btn.innerHTML = `
-                <svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;">
-                    <path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5-4.5s-4.5 2-4.5 4.5 2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4-2.7-3.2zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.43-4.73-5.25v.25c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1h-2v2h6c.55 0 1 .45 1 1v1.17c-.61.5-1.07 1.16-1.34 1.83H12v2h2c0 .73.16 1.41.43 2.04l-.43.43V20z"></path>
+                <svg class="${svgClass}" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;">
+                    <path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5s-4.5 2-4.5 4.5 2 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4-2.7-3.2zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.43-4.73-5.25v.25c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1h-2v2h6c.55 0 1 .45 1 1v1.17c-.61.5-1.07 1.16-1.34 1.83H12v2h2c0 .73.16 1.41.43 2.04l-.43.43V20z"></path>
                 </svg>
             `;
+
+            syncButtonTheme(btn, searchBtn);
 
             btn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 if (isSeerOpen) {
-                    closeSeer();
+                    closeSeer(true);
                 } else {
                     openSeer();
                 }
             };
 
+            btn.addEventListener('mouseenter', () => {
+                if (!isSeerOpen) {
+                    btn.style.setProperty('color', 'var(--jf-palette-text-primary, #ffffff)', 'important');
+                    btn.style.setProperty('opacity', '1', 'important');
+                }
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                if (!isSeerOpen) {
+                    syncButtonTheme(btn, searchBtn);
+                }
+            });
+
             if (searchBtn && searchBtn.parentElement) {
-                // Insert on the right side of the regular search icon
+                // Insert directly on the right side of the regular search icon
                 searchBtn.insertAdjacentElement('afterend', btn);
             } else {
                 // Fallback: inside right buttons container before user menu
@@ -127,7 +211,7 @@ import './styles/seer.scss';
                 }
             }
 
-            console.debug('[SeerPlugin] Injected single Seer button on the right side of Search icon');
+            console.debug('[SeerPlugin] Injected theme-adapted Seer button adjacent to Search icon');
             injectDrawerLink();
             return;
         }
@@ -147,7 +231,7 @@ import './styles/seer.scss';
                 e.preventDefault();
                 e.stopPropagation();
                 if (isSeerOpen) {
-                    closeSeer();
+                    closeSeer(true);
                 } else {
                     openSeer();
                 }
@@ -210,17 +294,67 @@ import './styles/seer.scss';
         }
     }
 
-    // Handle browser back button
-    window.addEventListener('popstate', () => {
-        if (isSeerOpen) {
-            if (seerContainer) {
-                seerContainer.style.display = 'none';
-                ReactDOM.unmountComponentAtNode(seerContainer);
-            }
-            isSeerOpen = false;
-            const btn = document.querySelector('[data-seer-btn="true"]');
-            if (btn) btn.classList.remove('active');
+    // Top Bar & Navigation Click Interception:
+    // If the user clicks on Home, Series, Movies, Search, or any other header/drawer item
+    // while Seer is open, immediately close Seer so Jellyfin's requested view renders cleanly.
+    document.addEventListener('click', (e) => {
+        if (!isSeerOpen) return;
+        const target = e.target as HTMLElement;
+        if (!target) return;
+
+        // If clicking on our Seer button or inside the Seer page, let normal handling occur
+        if (target.closest('[data-seer-btn="true"]') || target.closest('#seerPluginRoot')) {
+            return;
         }
+
+        // If user clicks anywhere on Jellyfin header, toolbar, navigation drawer, or search
+        if (
+            target.closest('header') ||
+            target.closest('.skinHeader') ||
+            target.closest('.mainDrawer') ||
+            target.closest('.MuiDrawer-root') ||
+            target.closest('nav')
+        ) {
+            console.debug('[SeerPlugin] Navigation click detected in top bar/drawer, closing Seer view');
+            closeSeer(false);
+        }
+    }, true);
+
+    // Track React Router and Browser Navigation:
+    function handleNavigationChange() {
+        if (!isSeerOpen) return;
+        const hash = window.location.hash;
+        const path = window.location.pathname;
+        if (hash !== '#seer' && !path.endsWith('/seer')) {
+            console.debug('[SeerPlugin] Navigation change detected away from Seer, closing view');
+            closeSeer(false);
+        }
+    }
+
+    const origPushState = history.pushState;
+    history.pushState = function(...args) {
+        origPushState.apply(this, args);
+        handleNavigationChange();
+    };
+
+    const origReplaceState = history.replaceState;
+    history.replaceState = function(...args) {
+        origReplaceState.apply(this, args);
+        handleNavigationChange();
+    };
+
+    window.addEventListener('popstate', handleNavigationChange);
+    window.addEventListener('hashchange', handleNavigationChange);
+
+    // Jellyfin native viewshow event
+    document.addEventListener('viewshow', (e: any) => {
+        if (!isSeerOpen) return;
+        const view = e.detail?.element || e.target;
+        if (view && (view.id === 'seerPage' || view.closest?.('#seerPluginRoot'))) {
+            return;
+        }
+        console.debug('[SeerPlugin] Jellyfin viewshow event fired, exiting Seer view');
+        closeSeer(false);
     });
 
     // Check on startup
@@ -238,6 +372,12 @@ import './styles/seer.scss';
         }
     }
 
-    // Keep navigation icon active across React route changes
-    setInterval(injectNavigation, 1000);
+    // Keep navigation icon active and theme-synced across route & DOM changes
+    setInterval(() => {
+        if (isSeerOpen && window.location.hash !== '#seer' && !window.location.pathname.endsWith('/seer')) {
+            closeSeer(false);
+        }
+        injectNavigation();
+    }, 600);
 })();
+

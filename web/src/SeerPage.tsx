@@ -29,6 +29,7 @@ class SeerBackdropManager {
     private currentIndex = -1;
     private intervalId: any = null;
     private currentActiveImg: HTMLElement | null = null;
+    private previousRotationUrl: string | null = null;
 
     private getContainer(): HTMLElement {
         if (!this.container || !document.body.contains(this.container)) {
@@ -37,6 +38,12 @@ class SeerBackdropManager {
                 existing = document.createElement('div');
                 existing.id = 'seerBackdropContainer';
                 existing.className = 'seerBackdropContainer';
+
+                // Frosted ambient blur overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'seerBackdropOverlay';
+                existing.appendChild(overlay);
+
                 const seerRoot = document.getElementById('seerPluginRoot') || document.body;
                 seerRoot.insertBefore(existing, seerRoot.firstChild);
             }
@@ -46,8 +53,33 @@ class SeerBackdropManager {
     }
 
     public setBackdrop(url: string) {
+        if (!url) return;
+        // Remember previous backdrop before detail modal opened so we can restore smoothly
+        if (this.currentImages.length > 0 && this.currentIndex >= 0) {
+            this.previousRotationUrl = this.currentImages[this.currentIndex];
+        }
         this.clearRotation();
         this.transitionTo(url);
+    }
+
+    public restoreRotation(urls: string[]) {
+        this.currentImages = urls;
+        if (!urls || urls.length === 0) {
+            this.clear();
+            return;
+        }
+
+        // Smoothly crossfade back to previous rotation URL or current index
+        const targetUrl = this.previousRotationUrl || urls[this.currentIndex >= 0 ? this.currentIndex : 0];
+        this.transitionTo(targetUrl);
+
+        this.clearRotation();
+        if (urls.length > 1) {
+            this.intervalId = setInterval(() => {
+                this.currentIndex = (this.currentIndex + 1) % this.currentImages.length;
+                this.transitionTo(this.currentImages[this.currentIndex]);
+            }, 8000);
+        }
     }
 
     public setBackdropImages(urls: string[]) {
@@ -57,6 +89,7 @@ class SeerBackdropManager {
         }
         this.currentImages = urls;
         this.currentIndex = 0;
+        this.previousRotationUrl = urls[0];
         this.transitionTo(urls[0]);
 
         this.clearRotation();
@@ -74,22 +107,38 @@ class SeerBackdropManager {
         const seerRoot = document.getElementById('seerPluginRoot');
         if (seerRoot) seerRoot.classList.add('withBackdrop');
 
+        const jfBackground = document.querySelector('.backgroundContainer');
+        if (jfBackground) jfBackground.classList.add('withBackdrop');
+
         const img = new Image();
         img.onload = () => {
+            if (!this.container || !document.body.contains(this.container)) return;
+
             const backdropEl = document.createElement('div');
             backdropEl.className = 'seerBackdropImage';
             backdropEl.style.backgroundImage = `url("${url}")`;
-            container.appendChild(backdropEl);
+            backdropEl.setAttribute('data-url', url);
 
-            requestAnimationFrame(() => {
-                backdropEl.classList.add('active');
-            });
+            // Insert behind the frosted overlay
+            const overlay = container.querySelector('.seerBackdropOverlay');
+            if (overlay) {
+                container.insertBefore(backdropEl, overlay);
+            } else {
+                container.appendChild(backdropEl);
+            }
 
             const oldImg = this.currentActiveImg;
             this.currentActiveImg = backdropEl;
-            if (oldImg) {
+
+            // Delayed cleanup allows smooth 1000ms crossfade
+            if (oldImg && oldImg !== backdropEl) {
                 setTimeout(() => {
-                    if (oldImg.parentElement) oldImg.remove();
+                    if (oldImg.parentElement) {
+                        oldImg.classList.add('fadeOut');
+                        setTimeout(() => {
+                            if (oldImg.parentElement) oldImg.remove();
+                        }, 800);
+                    }
                 }, 1000);
             }
         };
@@ -99,11 +148,21 @@ class SeerBackdropManager {
     public clear() {
         this.clearRotation();
         if (this.container) {
-            this.container.innerHTML = '';
+            const images = this.container.querySelectorAll('.seerBackdropImage');
+            images.forEach(img => {
+                (img as HTMLElement).classList.add('fadeOut');
+                setTimeout(() => {
+                    if (img.parentElement) img.remove();
+                }, 600);
+            });
         }
         this.currentActiveImg = null;
+        this.previousRotationUrl = null;
         const seerRoot = document.getElementById('seerPluginRoot');
         if (seerRoot) seerRoot.classList.remove('withBackdrop');
+
+        const jfBackground = document.querySelector('.backgroundContainer');
+        if (jfBackground) jfBackground.classList.remove('withBackdrop');
     }
 
     private clearRotation() {
@@ -118,6 +177,7 @@ const seerBackdrops = new SeerBackdropManager();
 const clearBackdrop = () => seerBackdrops.clear();
 const setBackdrop = (url: string) => seerBackdrops.setBackdrop(url);
 const setBackdropImages = (urls: string[]) => seerBackdrops.setBackdropImages(urls);
+const restoreBackdropImages = (urls: string[]) => seerBackdrops.restoreRotation(urls);
 
 type ActiveTab = 'discovery' | 'search' | 'requests' | 'settings';
 
@@ -394,7 +454,7 @@ export const SeerPage: FC<SeerPageProps> = ({ onClose }) => {
                         onClose={() => {
                             setSelectedMediaForDetail(null);
                             if (backdropsEnabled && trendingBackdropsRef.current.length > 0) {
-                                setBackdropImages(trendingBackdropsRef.current);
+                                restoreBackdropImages(trendingBackdropsRef.current);
                             } else if (!backdropsEnabled) {
                                 clearBackdrop();
                             }
