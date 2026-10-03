@@ -54,9 +54,10 @@ public class SeerProxyController : ControllerBase
     }
 
     /// <summary>
-    /// Proxies requests to the internal Seer instance.
+    /// Proxies requests to the internal Seer instance with transparent SSO delegation.
     /// </summary>
     [Route("Proxy/{**path}")]
+    [Route("/avatarproxy/{**path}")]
     [AllowAnonymous]
     public async Task ProxyRequest()
     {
@@ -69,10 +70,19 @@ public class SeerProxyController : ControllerBase
         }
 
         var seerBaseUrl = (config.SeerServerUrl ?? "http://localhost:5055").TrimEnd('/');
-        var targetSubpath = Request.Path.Value?.Replace("/Plugins/Seer/Proxy", "") ?? "";
-        if (!targetSubpath.StartsWith('/'))
+        var rawPath = Request.Path.Value ?? "";
+        string targetSubpath;
+        if (rawPath.StartsWith("/avatarproxy", StringComparison.OrdinalIgnoreCase))
         {
-            targetSubpath = "/" + targetSubpath;
+            targetSubpath = rawPath;
+        }
+        else
+        {
+            targetSubpath = rawPath.Replace("/Plugins/Seer/Proxy", "");
+            if (!targetSubpath.StartsWith('/'))
+            {
+                targetSubpath = "/" + targetSubpath;
+            }
         }
 
         var targetUrl = $"{seerBaseUrl}{targetSubpath}{Request.QueryString}";
@@ -92,6 +102,22 @@ public class SeerProxyController : ControllerBase
                 }
 
                 proxyMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+            }
+
+            // Check if request already has an established user session cookie
+            bool hasSeerCookie = Request.Headers.TryGetValue("Cookie", out var cookieHeader) &&
+                                 cookieHeader.ToString().Contains("connect.sid");
+
+            // Exclude explicit user login endpoints from auto-injecting admin API key
+            bool isAuthSubmission = targetSubpath.StartsWith("/api/v1/auth/local", StringComparison.OrdinalIgnoreCase) ||
+                                    targetSubpath.StartsWith("/api/v1/auth/jellyfin", StringComparison.OrdinalIgnoreCase);
+
+            // Transparently inject Seer Admin API Key for zero-login SSO delegation when available
+            if (!hasSeerCookie && !isAuthSubmission &&
+                !string.IsNullOrEmpty(config.SeerAdminApiKey) &&
+                !proxyMessage.Headers.Contains("X-Api-Key"))
+            {
+                proxyMessage.Headers.TryAddWithoutValidation("X-Api-Key", config.SeerAdminApiKey);
             }
 
             // Copy body for non-GET/HEAD requests

@@ -27,7 +27,7 @@ import './styles/seer.scss';
 
         // Safely inspect reference button or neighboring icons for any explicit theme colors
         try {
-            const ref = refBtn || document.querySelector('header a.MuiIconButton-colorInherit, header button.MuiIconButton-colorInherit');
+            const ref = refBtn || document.querySelector('header a.MuiIconButton-colorInherit, header button.MuiIconButton-colorInherit, .headerRight .headerButton');
             if (ref) {
                 const comp = window.getComputedStyle(ref);
                 const color = comp.color;
@@ -45,7 +45,7 @@ import './styles/seer.scss';
     }
 
     function openSeer() {
-        const header = document.querySelector('header');
+        const header = document.querySelector('header, .skinHeader:not([class*="hide"]):not([style*="display: none"])');
         const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 48;
 
         if (!seerContainer) {
@@ -69,7 +69,7 @@ import './styles/seer.scss';
 
         // Update button active state & styling
         const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
-        const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i]') as HTMLElement;
+        const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i], .headerSearchButton') as HTMLElement;
         if (btn) syncButtonTheme(btn, searchBtn);
 
         ReactDOM.render(React.createElement(SeerPage, { onClose: () => closeSeer(true) }), seerContainer);
@@ -102,6 +102,8 @@ import './styles/seer.scss';
         }
         console.debug('[SeerPlugin] Seer view unmounted');
     }
+
+    const SEER_ICON_SVG = '<svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor; display: block;"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.47-4.73-5.41V5c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1H8v2h2v3H9l-4.79-4.79C4.08 10.79 4 11.38 4 12c0 4.41 3.59 8 8 8"></path></svg>';
 
     /**
      * Checks if the active view is within the server administration dashboard.
@@ -142,7 +144,6 @@ import './styles/seer.scss';
             const searchBtn = modernToolbar.querySelector('a[href*="/search"], a[aria-label*="Search" i], button[aria-label*="Search" i]') as HTMLElement;
             
             // Only inject the top bar button if the regular search button is present in this toolbar.
-            // On the admin dashboard header, there is NO search button, preventing any dashboard leakage.
             if (!searchBtn) {
                 document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
                 injectDrawerLink();
@@ -172,7 +173,7 @@ import './styles/seer.scss';
             btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
             btn.title = 'Requests & Discovery (Seer)';
             btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
-            btn.innerHTML = '<svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.47-4.73-5.41V5c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1H8v2h2v3H9l-4.79-4.79C4.08 10.79 4 11.38 4 12c0 4.41 3.59 8 8 8"></path></svg>';
+            btn.innerHTML = SEER_ICON_SVG;
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -190,16 +191,46 @@ import './styles/seer.scss';
             return;
         }
 
-        // Legacy Header fallback
+        // Legacy Header (Default Stock Theme): paper-icon-button-light in .skinHeader .headerRight
         const legacyHeader = document.querySelector('.skinHeader:not([class*="hide"]):not([style*="display: none"]) .headerRight');
-        if (legacyHeader && !document.querySelector('[data-seer-btn="true"]')) {
+        if (legacyHeader) {
+            const searchBtn = legacyHeader.querySelector('.headerSearchButton') as HTMLElement;
+            if (!searchBtn) {
+                document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
+                injectDrawerLink();
+                return;
+            }
+
+            const existingBtn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
+            if (existingBtn) {
+                if (existingBtn.previousElementSibling === searchBtn) {
+                    if (isSeerOpen && !existingBtn.classList.contains('active')) {
+                        existingBtn.classList.add('active');
+                    } else if (!isSeerOpen && existingBtn.classList.contains('active')) {
+                        existingBtn.classList.remove('active');
+                    }
+                    if (searchBtn.classList.contains('hide')) {
+                        existingBtn.classList.add('hide');
+                    } else {
+                        existingBtn.classList.remove('hide');
+                    }
+                    injectDrawerLink();
+                    return;
+                }
+                existingBtn.remove();
+            }
+
+            document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
+
             const btn = document.createElement('button');
             btn.type = 'button';
+            btn.setAttribute('is', 'paper-icon-button-light');
             btn.setAttribute('data-seer-btn', 'true');
             btn.id = 'headerSeerBtn';
-            btn.className = 'headerButton headerButtonRight';
+            btn.className = 'headerButton headerButtonRight headerButton-plantitle headerSeerButton paper-icon-button-light';
             btn.title = 'Requests & Discovery (Seer)';
-            btn.innerHTML = '<span class="material-icons travel_explore" aria-hidden="true" style="font-size: 1.5em; vertical-align: middle;">travel_explore</span>';
+            btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
+            btn.innerHTML = `<span class="material-icons" aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em;">${SEER_ICON_SVG}</span>`;
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -211,12 +242,13 @@ import './styles/seer.scss';
                 }
             };
 
-            const userBtn = legacyHeader.querySelector('.headerUserButton');
-            if (userBtn) {
-                legacyHeader.insertBefore(btn, userBtn);
-            } else {
-                legacyHeader.appendChild(btn);
+            searchBtn.insertAdjacentElement('afterend', btn);
+            if (searchBtn.classList.contains('hide')) {
+                btn.classList.add('hide');
             }
+            syncButtonTheme(btn, searchBtn);
+            injectDrawerLink();
+            return;
         }
 
         injectDrawerLink();
@@ -247,7 +279,7 @@ import './styles/seer.scss';
             };
             item.innerHTML = `
                 <div class="MuiListItemIcon-root" style="min-width: 40px; color: inherit;">
-                    <span class="material-icons travel_explore">travel_explore</span>
+                    ${SEER_ICON_SVG}
                 </div>
                 <div class="MuiListItemText-root">
                     <span class="MuiTypography-root MuiTypography-body1">Requests & Discovery</span>
@@ -262,14 +294,14 @@ import './styles/seer.scss';
         if (legacyDrawer) {
             const link = document.createElement('a');
             link.setAttribute('data-seer-drawer', 'true');
-            link.className = 'navMenuOption lnkMediaFolder';
+            link.className = 'navMenuOption lnkMediaFolder lnkSeer';
             link.href = '#';
             link.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 openSeer();
             };
-            link.innerHTML = '<span class="material-icons navMenuOptionIcon travel_explore" aria-hidden="true">travel_explore</span><span class="navMenuOptionText">Requests & Discovery</span>';
+            link.innerHTML = `<span class="material-icons navMenuOptionIcon" aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em; margin-right: 0.8em;">${SEER_ICON_SVG}</span><span class="navMenuOptionText">Requests & Discovery</span>`;
             legacyDrawer.appendChild(link);
         }
     }
@@ -337,27 +369,44 @@ import './styles/seer.scss';
         closeSeer(false);
     });
 
-    // Check on startup
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+    // Instantaneous 0ms injection via requestAnimationFrame-debounced MutationObserver
+    let rafScheduled = false;
+    function scheduleInjectNavigation() {
+        if (rafScheduled) return;
+        rafScheduled = true;
+        requestAnimationFrame(() => {
+            rafScheduled = false;
             injectNavigation();
-            if (window.location.hash === '#seer') {
-                setTimeout(openSeer, 500);
-            }
         });
-    } else {
-        injectNavigation();
-        if (window.location.hash === '#seer') {
-            setTimeout(openSeer, 500);
-        }
     }
 
-    // Keep navigation icon active and theme-synced across route & DOM changes
+    const observer = new MutationObserver(() => {
+        scheduleInjectNavigation();
+    });
+
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) {
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+            scheduleInjectNavigation();
+        });
+    }
+
+    // Immediate initial run
+    scheduleInjectNavigation();
+    if (window.location.hash === '#seer') {
+        setTimeout(openSeer, 300);
+    }
+
+    // Heartbeat fallback to catch any async router state transitions
     setInterval(() => {
         if (isSeerOpen && window.location.hash !== '#seer' && !window.location.pathname.endsWith('/seer')) {
             closeSeer(false);
         }
-        injectNavigation();
-    }, 600);
+        scheduleInjectNavigation();
+    }, 800);
 })();
 
