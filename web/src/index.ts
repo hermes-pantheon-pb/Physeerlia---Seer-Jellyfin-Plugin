@@ -13,55 +13,35 @@ import './styles/seer.scss';
 
     /**
      * Dynamically synchronizes the Seer icon button styling with the active Jellyfin theme.
-     * Accurately infers color, opacity, and sizing from neighboring toolbar icons.
+     * Accurately infers color and active state from neighboring toolbar icons.
      */
     function syncButtonTheme(btn: HTMLElement, refBtn: HTMLElement | null) {
         if (!btn) return;
 
         if (isSeerOpen) {
             btn.classList.add('active');
-            btn.style.setProperty('color', 'var(--jf-palette-primary-main, #00a4dc)', 'important');
-            btn.style.setProperty('opacity', '1', 'important');
             return;
         }
 
         btn.classList.remove('active');
 
-        let sampledColor = '';
-        let sampledOpacity = '';
-
-        // Prioritize adjacent search button, otherwise check any other active header icon
-        const candidates = [
-            refBtn?.querySelector('svg'),
-            refBtn,
-            document.querySelector('header a.MuiIconButton-colorInherit:not([data-seer-btn]) svg'),
-            document.querySelector('header button.MuiIconButton-colorInherit:not([data-seer-btn]) svg'),
-            document.querySelector('header .MuiIconButton-root:not([data-seer-btn]) svg'),
-            document.querySelector('header .MuiIconButton-root:not([data-seer-btn])')
-        ].filter(Boolean) as HTMLElement[];
-
-        for (const el of candidates) {
-            // Skip disabled elements as they may have diminished opacity
-            if (el.closest('[disabled]') || el.closest('[aria-disabled="true"]')) {
-                continue;
+        // Safely inspect reference button or neighboring icons for any explicit theme colors
+        try {
+            const ref = refBtn || document.querySelector('header a.MuiIconButton-colorInherit, header button.MuiIconButton-colorInherit');
+            if (ref) {
+                const comp = window.getComputedStyle(ref);
+                const color = comp.color;
+                if (color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
+                    btn.style.setProperty('--seer-inferred-color', color);
+                }
             }
-            const comp = window.getComputedStyle(el);
-            const color = comp.color;
-            if (color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
-                sampledColor = color;
-                sampledOpacity = comp.opacity || '1';
-                break;
-            }
+        } catch (e) {
+            console.debug('[SeerPlugin] syncButtonTheme safe fallback', e);
         }
 
-        if (sampledColor) {
-            btn.style.setProperty('color', sampledColor, 'important');
-            btn.style.setProperty('opacity', sampledOpacity, 'important');
-        } else {
-            // Fallback to Jellyfin theme secondary text variable
-            btn.style.setProperty('color', 'var(--jf-palette-text-secondary, rgba(255, 255, 255, 0.7))', 'important');
-            btn.style.setProperty('opacity', '1', 'important');
-        }
+        // Clean up direct inline overrides so the CSS variables take full control
+        btn.style.removeProperty('color');
+        btn.style.removeProperty('opacity');
     }
 
     function openSeer() {
@@ -152,27 +132,14 @@ import './styles/seer.scss';
             btn.setAttribute('data-seer-btn', 'true');
             btn.id = 'headerSeerBtn';
 
-            // Inherit exact classes from search button so MUI/Emotion themes style it identically
-            if (searchBtn) {
-                btn.className = `seerHeaderMuiBtn ${searchBtn.className}`;
-            } else {
-                btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
-            }
+            // Clean Material-UI button classes with Seer styling hook
+            btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
 
             btn.title = 'Requests & Discovery (Seer)';
             btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
 
-            const searchSvg = searchBtn?.querySelector('svg');
-            const svgClass = searchSvg ? searchSvg.getAttribute('class') || 'MuiSvgIcon-root MuiSvgIcon-fontSizeMedium' : 'MuiSvgIcon-root MuiSvgIcon-fontSizeMedium';
-
-            // Material-UI exact TravelExplore SVG icon with inferred svg styling
-            btn.innerHTML = `
-                <svg class="${svgClass}" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;">
-                    <path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5s-4.5 2-4.5 4.5 2 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4-2.7-3.2zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.43-4.73-5.25v.25c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1h-2v2h6c.55 0 1 .45 1 1v1.17c-.61.5-1.07 1.16-1.34 1.83H12v2h2c0 .73.16 1.41.43 2.04l-.43.43V20z"></path>
-                </svg>
-            `;
-
-            syncButtonTheme(btn, searchBtn);
+            // Material-UI exact TravelExplore SVG icon
+            btn.innerHTML = '<svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.47-4.73-5.41V5c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1H8v2h2v3H9l-4.79-4.79C4.08 10.79 4 11.38 4 12c0 4.41 3.59 8 8 8"></path></svg>';
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -184,25 +151,12 @@ import './styles/seer.scss';
                 }
             };
 
-            btn.addEventListener('mouseenter', () => {
-                if (!isSeerOpen) {
-                    btn.style.setProperty('color', 'var(--jf-palette-text-primary, #ffffff)', 'important');
-                    btn.style.setProperty('opacity', '1', 'important');
-                }
-            });
-
-            btn.addEventListener('mouseleave', () => {
-                if (!isSeerOpen) {
-                    syncButtonTheme(btn, searchBtn);
-                }
-            });
-
             if (searchBtn && searchBtn.parentElement) {
                 // Insert directly on the right side of the regular search icon
-                searchBtn.insertAdjacentElement('afterend', btn);
+                searchBtn.insertAdjacentElement("afterend", btn);
             } else {
                 // Fallback: inside right buttons container before user menu
-                const userBox = modernToolbar.querySelector('button[aria-label*="user" i]')?.closest('.MuiBox-root') ||
+                const userBox = modernToolbar.querySelector('button[aria-label*="user" i]')?.closest(".MuiBox-root") ||
                                 modernToolbar.querySelector('button[aria-label*="user" i]');
                 if (userBox && userBox.parentElement) {
                     userBox.parentElement.insertBefore(btn, userBox);
@@ -210,6 +164,8 @@ import './styles/seer.scss';
                     modernToolbar.appendChild(btn);
                 }
             }
+
+            syncButtonTheme(btn, searchBtn);
 
             console.debug('[SeerPlugin] Injected theme-adapted Seer button adjacent to Search icon');
             injectDrawerLink();
