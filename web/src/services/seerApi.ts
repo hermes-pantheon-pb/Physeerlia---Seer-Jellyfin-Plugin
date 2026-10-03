@@ -34,7 +34,7 @@ class SeerApiService {
 
     constructor() {
         // Default to the user's Seer server URL
-        this.serverUrl = localStorage.getItem(STORAGE_KEYS.URL) || 'http://10.10.10.172:5055';
+        this.serverUrl = localStorage.getItem(STORAGE_KEYS.URL) || 'http://localhost:5055';
 
         // Restore cached user session if present
         const storedUser = localStorage.getItem(STORAGE_KEYS.USER);

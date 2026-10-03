@@ -109,7 +109,7 @@ export const SeerSettings: FC<SeerSettingsProps> = ({ onSignOut }) => {
                             type='text'
                             value={serverUrl}
                             onChange={(e) => setServerUrl(e.target.value)}
-                            placeholder='http://10.10.10.172:5055'
+                            placeholder='http://localhost:5055'
                         />
                         <span className='helperText'>Base URL of your Seer instance. All user requests communicate via user session cookies.</span>
                     </div>

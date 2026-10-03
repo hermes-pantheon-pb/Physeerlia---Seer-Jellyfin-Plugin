@@ -131,7 +131,7 @@ export const SeerLogin: FC<SeerLoginProps> = ({ onLoginSuccess }) => {
                         type='text'
                         value={serverUrl}
                         onChange={(e) => setServerUrl(e.target.value)}
-                        placeholder='http://10.10.10.172:5055'
+                        placeholder='http://localhost:5055'
                         required
                     />
                 </div>

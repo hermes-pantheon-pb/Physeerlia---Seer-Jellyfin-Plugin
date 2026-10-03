@@ -9,7 +9,7 @@ public class PluginConfiguration : BasePluginConfiguration
 {
     public PluginConfiguration()
     {
-        SeerServerUrl = "http://10.10.10.172:5055";
+        SeerServerUrl = "http://localhost:5055";
         SeerAdminApiKey = string.Empty;
         EnableProxy = true;
         EnableUserDelegation = true;
