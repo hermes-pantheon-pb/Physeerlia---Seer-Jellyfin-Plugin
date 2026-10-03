@@ -1,69 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Seer Integration Configuration</title>
-</head>
-<body>
-    <div id="seerConfigurationPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
-        <div data-role="content">
-            <div class="content-primary">
-                <h1>Seer Integration (Overseerr / Jellyseerr)</h1>
-                <p>Configure the internal connection to your Overseerr or Jellyseerr instance. This allows Jellyfin to securely proxy requests without exposing Seer to the public internet.</p>
+<div id="seerConfigurationPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            <h1>Seer Integration (Overseerr / Jellyseerr)</h1>
+            <p>Configure the internal connection to your Overseerr or Jellyseerr instance. This allows Jellyfin to securely proxy requests without exposing Seer to the public internet.</p>
 
-                <form id="seerConfigForm">
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="SeerServerUrl">Internal Seer Server URL</label>
-                        <input is="emby-input" type="url" id="SeerServerUrl" name="SeerServerUrl" required />
-                        <div class="fieldDescription">The internal network address accessible by this Jellyfin server (e.g., http://localhost:5055 or http://192.168.1.100:5055). Never exposed to end users.</div>
-                    </div>
+            <form id="seerConfigForm">
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="SeerServerUrl">Internal Seer Server URL</label>
+                    <input is="emby-input" type="url" id="SeerServerUrl" name="SeerServerUrl" required />
+                    <div class="fieldDescription">The internal network address accessible by this Jellyfin server (e.g., http://localhost:5055 or http://10.10.10.172:5055). Never exposed to end users.</div>
+                </div>
 
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="SeerAdminApiKey">Seer Admin API Key</label>
-                        <input is="emby-input" type="password" id="SeerAdminApiKey" name="SeerAdminApiKey" autocomplete="off" />
-                        <div class="fieldDescription">Required for automatic zero-login user delegation and server-side metadata lookups. Found in Overseerr Settings &rarr; General &rarr; API Key.</div>
-                    </div>
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="SeerAdminApiKey">Seer Admin API Key</label>
+                    <input is="emby-input" type="password" id="SeerAdminApiKey" name="SeerAdminApiKey" autocomplete="off" />
+                    <div class="fieldDescription">Required for automatic zero-login user delegation and server-side metadata lookups. Found in Overseerr Settings &rarr; General &rarr; API Key.</div>
+                </div>
 
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label">
-                            <input is="emby-checkbox" type="checkbox" id="EnableProxy" name="EnableProxy" />
-                            <span>Enable Reverse Proxy</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Proxies all client requests through Jellyfin, bypassing CORS restrictions and firewall isolation.</div>
-                    </div>
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="EnableProxy" name="EnableProxy" />
+                        <span>Enable Reverse Proxy</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Proxies all client requests through Jellyfin, bypassing CORS restrictions and firewall isolation.</div>
+                </div>
 
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label">
-                            <input is="emby-checkbox" type="checkbox" id="EnableUserDelegation" name="EnableUserDelegation" />
-                            <span>Enable Zero-Login User Delegation</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Automatically maps logged-in Jellyfin accounts to their respective Seer profiles for seamless requesting.</div>
-                    </div>
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="EnableUserDelegation" name="EnableUserDelegation" />
+                        <span>Enable Zero-Login User Delegation</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Automatically maps logged-in Jellyfin accounts to their respective Seer profiles for seamless requesting.</div>
+                </div>
 
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label">
-                            <input is="emby-checkbox" type="checkbox" id="DefaultEnableBackdrops" name="DefaultEnableBackdrops" />
-                            <span>Enable Dynamic Backdrops by Default</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Displays dynamic rotating fanart backdrops behind the Seer discovery view.</div>
-                    </div>
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="DefaultEnableBackdrops" name="DefaultEnableBackdrops" />
+                        <span>Enable Dynamic Backdrops by Default</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Displays dynamic rotating fanart backdrops behind the Seer discovery view.</div>
+                </div>
 
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label">
-                            <input is="emby-checkbox" type="checkbox" id="DefaultEnableGlassTheme" name="DefaultEnableGlassTheme" />
-                            <span>Enable Frosted Glass (Abyss Style) by Default</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Applies translucent frosted glass cards and modal styling matching the Abyss Jellyfin theme.</div>
-                    </div>
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="DefaultEnableGlassTheme" name="DefaultEnableGlassTheme" />
+                        <span>Enable Frosted Glass (Abyss Style) by Default</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Applies translucent frosted glass cards and modal styling matching the Abyss Jellyfin theme.</div>
+                </div>
 
-                    <div style="margin-top: 2em; display: flex; gap: 1em;">
-                        <button is="emby-button" type="submit" class="raised button-submit block">
-                            <span>Save Configuration</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div style="margin-top: 2em; display: flex; gap: 1em;">
+                    <button is="emby-button" type="submit" class="raised button-submit block">
+                        <span>Save Configuration</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</body>
-</html>
+
+    <script type="text/javascript">
+        (function () {
+            'use strict';
+            var pluginId = 'b1b87a2a-4db3-4fc9-b59a-143c7b39922e';
+
+            function loadConfiguration(view) {
+                if (window.Dashboard && Dashboard.showLoadingMsg) {
+                    Dashboard.showLoadingMsg();
+                }
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    if (view.querySelector('#SeerServerUrl')) view.querySelector('#SeerServerUrl').value = config.SeerServerUrl || '';
+                    if (view.querySelector('#SeerAdminApiKey')) view.querySelector('#SeerAdminApiKey').value = config.SeerAdminApiKey || '';
+                    if (view.querySelector('#EnableProxy')) view.querySelector('#EnableProxy').checked = config.EnableProxy !== false;
+                    if (view.querySelector('#EnableUserDelegation')) view.querySelector('#EnableUserDelegation').checked = config.EnableUserDelegation !== false;
+                    if (view.querySelector('#DefaultEnableBackdrops')) view.querySelector('#DefaultEnableBackdrops').checked = config.DefaultEnableBackdrops !== false;
+                    if (view.querySelector('#DefaultEnableGlassTheme')) view.querySelector('#DefaultEnableGlassTheme').checked = config.DefaultEnableGlassTheme !== false;
+                    if (window.Dashboard && Dashboard.hideLoadingMsg) {
+                        Dashboard.hideLoadingMsg();
+                    }
+                }).catch(function (e) {
+                    console.error('[SeerConfig] Error loading configuration:', e);
+                    if (window.Dashboard && Dashboard.hideLoadingMsg) {
+                        Dashboard.hideLoadingMsg();
+                    }
+                });
+            }
+
+            function saveConfiguration(view) {
+                if (window.Dashboard && Dashboard.showLoadingMsg) {
+                    Dashboard.showLoadingMsg();
+                }
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    config.SeerServerUrl = (view.querySelector('#SeerServerUrl').value || '').replace(/\/+$/, '');
+                    config.SeerAdminApiKey = view.querySelector('#SeerAdminApiKey').value || '';
+                    config.EnableProxy = view.querySelector('#EnableProxy').checked;
+                    config.EnableUserDelegation = view.querySelector('#EnableUserDelegation').checked;
+                    config.DefaultEnableBackdrops = view.querySelector('#DefaultEnableBackdrops').checked;
+                    config.DefaultEnableGlassTheme = view.querySelector('#DefaultEnableGlassTheme').checked;
+
+                    ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
+                        if (window.Dashboard && Dashboard.processPluginConfigurationUpdateResult) {
+                            Dashboard.processPluginConfigurationUpdateResult(result);
+                        } else {
+                            alert('Settings saved successfully!');
+                        }
+                    }).catch(function (err) {
+                        if (window.Dashboard && Dashboard.hideLoadingMsg) {
+                            Dashboard.hideLoadingMsg();
+                        }
+                        alert('Failed to save settings: ' + (err || 'Unknown error'));
+                    });
+                });
+            }
+
+            function init(view) {
+                if (!view) return;
+                loadConfiguration(view);
+
+                var form = view.querySelector('#seerConfigForm');
+                if (form && !form.dataset.bound) {
+                    form.dataset.bound = 'true';
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault();
+                        saveConfiguration(view);
+                        return false;
+                    });
+                }
+            }
+
+            // Execute immediately if view is present
+            var view = document.getElementById('seerConfigurationPage');
+            if (view) {
+                init(view);
+            }
+
+            // Also attach lifecycle listeners
+            document.addEventListener('viewshow', function (e) {
+                if (e.target && e.target.id === 'seerConfigurationPage') {
+                    init(e.target);
+                }
+            });
+            document.addEventListener('pageshow', function (e) {
+                if (e.target && e.target.id === 'seerConfigurationPage') {
+                    init(e.target);
+                }
+            });
+        })();
+    </script>
+</div>
