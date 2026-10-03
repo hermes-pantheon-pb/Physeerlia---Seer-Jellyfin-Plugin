@@ -104,46 +104,75 @@ import './styles/seer.scss';
     }
 
     /**
-     * Injects the Seer navigation icon into the visible header (Modern or Legacy)
+     * Checks if the active view is within the server administration dashboard.
+     */
+    function isDashboardView(): boolean {
+        const hash = (window.location.hash || '').toLowerCase();
+        const path = (window.location.pathname || '').toLowerCase();
+        return (
+            hash.includes('/dashboard') ||
+            path.includes('/dashboard') ||
+            hash.includes('configurationpage') ||
+            path.includes('configurationpage') ||
+            !!document.querySelector('.dashboardPage') ||
+            !!document.querySelector('#dashboardPage') ||
+            !!document.querySelector('#plugins-subheader') ||
+            !!document.querySelector('[aria-labelledby="server-subheader"]') ||
+            !!document.querySelector('.dashboardContainer') ||
+            !!document.querySelector('#serverConfigurationPage')
+        );
+    }
+
+    /**
+     * Injects the Seer navigation icon into the visible header (Modern or Legacy).
+     * Strictly restricted to media library views (never rendered on the admin dashboard).
      */
     function injectNavigation() {
+        if (isDashboardView()) {
+            // Clean up any stray buttons or drawer items on the admin dashboard
+            document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
+            document.querySelectorAll('[data-seer-drawer="true"]').forEach(el => el.remove());
+            return;
+        }
+
         // Modern Layout: Material-UI Toolbar in active header
         const modernToolbar = document.querySelector('header .MuiToolbar-root');
         if (modernToolbar) {
             // Locate the search button in the toolbar
             const searchBtn = modernToolbar.querySelector('a[href*="/search"], a[aria-label*="Search" i], button[aria-label*="Search" i]') as HTMLElement;
-            const existingBtn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
+            
+            // Only inject the top bar button if the regular search button is present in this toolbar.
+            // On the admin dashboard header, there is NO search button, preventing any dashboard leakage.
+            if (!searchBtn) {
+                document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
+                injectDrawerLink();
+                return;
+            }
 
+            const existingBtn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
             if (existingBtn) {
-                // If it is already in the right place directly after search, quickly verify active state without reflow
-                if (searchBtn && existingBtn.previousElementSibling === searchBtn) {
+                if (existingBtn.previousElementSibling === searchBtn) {
                     if (isSeerOpen && !existingBtn.classList.contains('active')) {
                         existingBtn.classList.add('active');
                     } else if (!isSeerOpen && existingBtn.classList.contains('active')) {
                         existingBtn.classList.remove('active');
                     }
+                    injectDrawerLink();
                     return;
                 }
-                // Otherwise remove misplaced button so it can be re-inserted correctly
                 existingBtn.remove();
             }
 
-            // Clean up any stray duplicates
             document.querySelectorAll('[data-seer-btn="true"]').forEach(el => el.remove());
 
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.setAttribute('data-seer-btn', 'true');
             btn.id = 'headerSeerBtn';
-
-            // Clean Material-UI button classes with Seer styling hook
             btn.className = 'seerHeaderMuiBtn MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge';
-
             btn.title = 'Requests & Discovery (Seer)';
             btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
-
-            // Material-UI exact TravelExplore SVG icon
-            btn.innerHTML = '<svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.47-4.73-5.41V5c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1H8v2h2v3H9l-4.79-4.79C4.08 10.79 4 11.38 4 12c0 4.41 3.59 8 8 8"></path></svg>';
+            btn.innerHTML = '<svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium" focusable="false" aria-hidden="true" viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.47-4.73-5.41V5c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1H8v2h2v3H9l-4.79-4.79C4.08 10.79 4 11.38 4 12c0 4.41 3.59 8 8 8"></path></svg>';
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -155,28 +184,13 @@ import './styles/seer.scss';
                 }
             };
 
-            if (searchBtn && searchBtn.parentElement) {
-                // Insert directly on the right side of the regular search icon
-                searchBtn.insertAdjacentElement("afterend", btn);
-            } else {
-                // Fallback: inside right buttons container before user menu
-                const userBox = modernToolbar.querySelector('button[aria-label*="user" i]')?.closest(".MuiBox-root") ||
-                                modernToolbar.querySelector('button[aria-label*="user" i]');
-                if (userBox && userBox.parentElement) {
-                    userBox.parentElement.insertBefore(btn, userBox);
-                } else {
-                    modernToolbar.appendChild(btn);
-                }
-            }
-
+            searchBtn.insertAdjacentElement('afterend', btn);
             syncButtonTheme(btn, searchBtn);
-
-            console.debug('[SeerPlugin] Injected theme-adapted Seer button adjacent to Search icon');
             injectDrawerLink();
             return;
         }
 
-        // Legacy Layout fallback
+        // Legacy Header fallback
         const legacyHeader = document.querySelector('.skinHeader:not([class*="hide"]):not([style*="display: none"]) .headerRight');
         if (legacyHeader && !document.querySelector('[data-seer-btn="true"]')) {
             const btn = document.createElement('button');
@@ -209,12 +223,18 @@ import './styles/seer.scss';
     }
 
     function injectDrawerLink() {
+        if (isDashboardView()) {
+            document.querySelectorAll('[data-seer-drawer="true"]').forEach(el => el.remove());
+            return;
+        }
+
         if (document.querySelector('[data-seer-drawer="true"]')) {
             return;
         }
 
-        // Modern Drawer List
-        const modernList = document.querySelector('.MuiDrawer-root .MuiList-root') || document.querySelector('nav .MuiList-root');
+        // Modern Drawer List: ONLY target the main media app drawer containing the Home link
+        const homeLink = document.querySelector('.MuiDrawer-root a[href*="/home"], nav a[href*="/home"]');
+        const modernList = homeLink?.closest('.MuiList-root');
         if (modernList) {
             const item = document.createElement('div');
             item.setAttribute('data-seer-drawer', 'true');
@@ -237,8 +257,8 @@ import './styles/seer.scss';
             return;
         }
 
-        // Legacy Drawer Options
-        const legacyDrawer = document.querySelector('.mainDrawer .navMenuOptionContainer') || document.querySelector('.navMenuOptionContainer');
+        // Legacy Drawer Options: strictly inside the user mainDrawer
+        const legacyDrawer = document.querySelector('.mainDrawer .navMenuOptionContainer');
         if (legacyDrawer) {
             const link = document.createElement('a');
             link.setAttribute('data-seer-drawer', 'true');
