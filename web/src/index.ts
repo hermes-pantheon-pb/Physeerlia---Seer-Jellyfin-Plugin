@@ -79,45 +79,26 @@ import './styles/seer.scss';
     function updateSeerPosition() {
         if (!seerContainer) return;
         const topOffset = getHeaderOffset();
-        seerContainer.style.top = `${topOffset}px`;
-        seerContainer.style.height = `calc(100vh - ${topOffset}px)`;
+        seerContainer.style.setProperty('--seer-top-offset', `${topOffset}px`);
     }
 
     function openSeer() {
         document.body.classList.add('seer-active');
         document.documentElement.classList.add('seer-active');
 
-        // Immediately initialize Seer ambient backdrop container at top: 0
-        // so the topbar and viewport immediately render over the clean Seer background
-        // without waiting for the first poster network load
-        let existingBackdrop = document.getElementById('seerBackdropContainer');
-        if (!existingBackdrop) {
-            existingBackdrop = document.createElement('div');
-            existingBackdrop.id = 'seerBackdropContainer';
-            existingBackdrop.className = 'seerBackdropContainer';
-
-            const overlay = document.createElement('div');
-            overlay.className = 'seerBackdropOverlay';
-            existingBackdrop.appendChild(overlay);
-
-            document.body.insertBefore(existingBackdrop, document.body.firstChild);
-        }
-        existingBackdrop.style.display = 'block';
-
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
-            seerContainer.className = 'page type-interior seerPageRoot withBackdrop';
+            seerContainer.className = 'page type-interior seerPageRoot';
             seerContainer.style.position = 'fixed';
+            seerContainer.style.top = '0';
             seerContainer.style.left = '0';
             seerContainer.style.right = '0';
             seerContainer.style.bottom = '0';
-            seerContainer.style.zIndex = '1050';
+            seerContainer.style.zIndex = '950';
             seerContainer.style.overflowY = 'auto';
             seerContainer.style.overflowX = 'hidden';
             document.body.appendChild(seerContainer);
-        } else {
-            seerContainer.classList.add('withBackdrop');
         }
 
         updateSeerPosition();
@@ -147,10 +128,6 @@ import './styles/seer.scss';
         if (seerContainer) {
             seerContainer.style.display = 'none';
             ReactDOM.unmountComponentAtNode(seerContainer);
-        }
-        const existingBackdrop = document.getElementById('seerBackdropContainer');
-        if (existingBackdrop) {
-            existingBackdrop.style.display = 'none';
         }
         isSeerOpen = false;
 
