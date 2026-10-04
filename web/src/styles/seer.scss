@@ -4,6 +4,14 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
+/* Clean topbar and eliminate previous page bleed-through when Seer is active */
+body.seer-active {
+    .headerTabs,
+    .sectionTabs {
+        display: none !important;
+    }
+}
+
 .seerHeaderMuiBtn,
 .headerButton.headerSeerButton,
 [data-seer-btn="true"] {
@@ -16,7 +24,7 @@
     outline: 0 !important;
     border: 0 !important;
     margin: 0 0.29em !important;
-    border-radius: 50% !important;
+    border-radius: var(--seer-inferred-radius, inherit) !important;
     cursor: pointer !important;
     user-select: none !important;
     text-decoration: none !important;
@@ -58,7 +66,7 @@
     }
 }
 
-/* Legacy layout: exact match with stock Jellyfin .headerButton.headerButtonRight */
+/* Legacy layout: exact parity with stock Jellyfin .headerButton.headerButtonRight */
 .headerButton.headerSeerButton {
     padding: 0.556em !important;
     width: auto !important;
@@ -67,10 +75,10 @@
     min-height: initial !important;
     max-width: initial !important;
     max-height: initial !important;
-    aspect-ratio: 1 / 1 !important;
     line-height: 1 !important;
     vertical-align: middle !important;
     margin: 0 0.29em !important;
+    border-radius: var(--seer-inferred-radius, inherit) !important;
 
     .seerHeaderLogoSvg,
     svg {
@@ -88,7 +96,7 @@
     min-height: 48px !important;
     max-width: 48px !important;
     max-height: 48px !important;
-    aspect-ratio: 1 / 1 !important;
+    border-radius: var(--seer-inferred-radius, 50%) !important;
     margin: 0 4px !important;
 
     .seerHeaderLogoSvg,
@@ -155,7 +163,7 @@
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
-    background-color: var(--jf-palette-background-default, #101010);
+    background-color: #101014;
 
     .seerBackdropImage {
         position: absolute;
@@ -212,12 +220,8 @@
     z-index: 1050;
     overflow-y: auto;
     overflow-x: hidden;
-    background-color: var(--jf-palette-background-default, #121212);
+    background-color: #101014 !important;
     box-sizing: border-box;
-
-    &.withBackdrop {
-        background-color: transparent !important;
-    }
 }
 
 .seerContainer {
@@ -552,7 +556,7 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: 2000 !important;
     display: flex;
     align-items: flex-start;
     justify-content: center;

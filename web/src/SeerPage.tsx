@@ -142,6 +142,9 @@ class SeerBackdropManager {
                 }, 1000);
             }
         };
+        img.onerror = () => {
+            console.debug('[SeerPlugin] Ambient backdrop image failed to load:', url);
+        };
         img.src = url;
     }
 
