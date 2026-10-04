@@ -44,7 +44,7 @@ jobs:
       - name: Build .NET Plugin
         run: dotnet build src/Jellyfin.Plugin.Seer/Jellyfin.Plugin.Seer.csproj -c Release --no-restore
 
-      - name: Package Plugin Artifacts
+      - name: Package Plugin Artifacts & Compute Checksum
         run: |
           mkdir -p dist/package
           cp src/Jellyfin.Plugin.Seer/bin/Release/net8.0/Jellyfin.Plugin.Seer.dll dist/package/
@@ -52,6 +52,9 @@ jobs:
           cd dist/package
           zip -r ../../jellyfin-plugin-seer.zip .
           cd ../..
+          CHECKSUM=$(md5sum jellyfin-plugin-seer.zip | awk '{ print $1 }')
+          echo "Computed package checksum: $CHECKSUM"
+          sed -i 's/"checksum": "[^"]*"/"checksum": "'"$CHECKSUM"'"/' manifest.json
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -67,3 +70,14 @@ jobs:
           files: |
             jellyfin-plugin-seer.zip
             manifest.json
+
+      - name: Sync Manifest Checksum to Repository
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: synchronize release checksum in manifest.json [skip ci]"
+            git push origin HEAD:main
+          fi
