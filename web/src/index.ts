@@ -34,9 +34,6 @@ import './styles/seer.scss';
                 if (color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
                     btn.style.setProperty('--seer-inferred-color', color);
                 }
-                if (comp.borderRadius && comp.borderRadius !== '0px') {
-                    btn.style.setProperty('--seer-inferred-radius', comp.borderRadius);
-                }
             }
         } catch (e) {
             console.debug('[SeerPlugin] syncButtonTheme safe fallback', e);
@@ -69,8 +66,6 @@ import './styles/seer.scss';
     }
 
     function openSeer() {
-        document.body.classList.add('seer-active');
-
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
@@ -82,16 +77,10 @@ import './styles/seer.scss';
             seerContainer.style.zIndex = '1050';
             seerContainer.style.overflowY = 'auto';
             seerContainer.style.overflowX = 'hidden';
-            seerContainer.style.backgroundColor = '#101014';
             document.body.appendChild(seerContainer);
-        } else {
-            seerContainer.style.backgroundColor = '#101014';
         }
 
         updateSeerPosition();
-        requestAnimationFrame(updateSeerPosition);
-        setTimeout(updateSeerPosition, 50);
-        setTimeout(updateSeerPosition, 150);
         window.addEventListener('resize', updateSeerPosition);
         seerContainer.style.display = 'block';
         isSeerOpen = true;
@@ -111,7 +100,6 @@ import './styles/seer.scss';
     }
 
     function closeSeer(revertHistory = true) {
-        document.body.classList.remove('seer-active');
         window.removeEventListener('resize', updateSeerPosition);
         if (seerContainer) {
             seerContainer.style.display = 'none';

@@ -4,24 +4,6 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
-/* Clean topbar and eliminate previous page bleed-through when Seer is active */
-body.seer-active {
-    .skinHeader,
-    header {
-        background-color: #101014 !important;
-        background-image: none !important;
-    }
-
-    .headerTabs,
-    .sectionTabs,
-    .emby-tabs,
-    .headerLeft .pageTitle,
-    .pageTitleWithDefaultLogo,
-    .pageTitleWithLogo {
-        display: none !important;
-    }
-}
-
 .seerHeaderMuiBtn,
 .headerButton.headerSeerButton,
 [data-seer-btn="true"] {
@@ -34,7 +16,7 @@ body.seer-active {
     outline: 0 !important;
     border: 0 !important;
     margin: 0 0.29em !important;
-    border-radius: var(--seer-inferred-radius, inherit) !important;
+    border-radius: 50% !important;
     cursor: pointer !important;
     user-select: none !important;
     text-decoration: none !important;
@@ -76,7 +58,7 @@ body.seer-active {
     }
 }
 
-/* Legacy layout: exact parity with stock Jellyfin .headerButton.headerButtonRight */
+/* Legacy layout: exact match with stock Jellyfin .headerButton.headerButtonRight */
 .headerButton.headerSeerButton {
     padding: 0.556em !important;
     width: auto !important;
@@ -85,10 +67,10 @@ body.seer-active {
     min-height: initial !important;
     max-width: initial !important;
     max-height: initial !important;
+    aspect-ratio: 1 / 1 !important;
     line-height: 1 !important;
     vertical-align: middle !important;
     margin: 0 0.29em !important;
-    border-radius: var(--seer-inferred-radius, inherit) !important;
 
     .seerHeaderLogoSvg,
     svg {
@@ -106,7 +88,7 @@ body.seer-active {
     min-height: 48px !important;
     max-width: 48px !important;
     max-height: 48px !important;
-    border-radius: var(--seer-inferred-radius, 50%) !important;
+    aspect-ratio: 1 / 1 !important;
     margin: 0 4px !important;
 
     .seerHeaderLogoSvg,
@@ -173,7 +155,7 @@ body.seer-active {
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
-    background-color: #101014;
+    background-color: var(--jf-palette-background-default, #101010);
 
     .seerBackdropImage {
         position: absolute;
@@ -186,6 +168,7 @@ body.seer-active {
         opacity: 1;
         filter: blur(var(--seer-backdrop-blur, 18px)) brightness(0.42) saturate(1.25);
         transform: scale(1.08);
+        will-change: opacity, transform;
         animation: seerBackdropFadeIn 1000ms cubic-bezier(0.4, 0, 0.2, 1) both;
 
         &.fadeOut {
@@ -229,8 +212,12 @@ body.seer-active {
     z-index: 1050;
     overflow-y: auto;
     overflow-x: hidden;
-    background-color: #101014 !important;
+    background-color: var(--jf-palette-background-default, #121212);
     box-sizing: border-box;
+
+    &.withBackdrop {
+        background-color: transparent !important;
+    }
 }
 
 .seerContainer {
@@ -369,6 +356,8 @@ body.seer-active {
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
+    content-visibility: auto;
+    contain-intrinsic-size: 200px 320px;
 
     &:hover {
         transform: translateY(-4px) scale(1.02);
@@ -563,7 +552,7 @@ body.seer-active {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 2000 !important;
+    z-index: 1000;
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -1452,9 +1441,9 @@ body.seer-active {
     /* Frosted Modals & Dialogs */
     &.seerModalBackdrop,
     .seerModalBackdrop {
-        background-color: rgba(0, 0, 0, 0.72) !important;
-        backdrop-filter: blur(6px) !important;
-        -webkit-backdrop-filter: blur(6px) !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
         align-items: flex-start !important;
         padding-top: calc(4.5em + env(safe-area-inset-top, 0px)) !important;
         padding-bottom: 2em !important;
@@ -1463,12 +1452,12 @@ body.seer-active {
 
     .seerModalContent,
     &.seerModalContent {
-        background-color: #18181c !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        background-color: rgba(var(--seer-glass-tint), 0.72) !important;
+        backdrop-filter: blur(var(--seer-glass-backdrop-blur)) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(var(--seer-glass-backdrop-blur)) saturate(180%) !important;
         border: 1px solid rgba(255, 255, 255, 0.16) !important;
         border-radius: calc(var(--seer-radius) + 2px) !important;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
         max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px)) !important;
         overflow: hidden !important;
         margin-top: 0 !important;
@@ -1517,16 +1506,16 @@ body.seer-active {
         }
 
         .cancelBtn {
-            background: rgba(255, 255, 255, 0.08) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+            background: rgba(var(--seer-glass-tint), 0.5) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
             border: 1px solid rgba(255, 255, 255, 0.18) !important;
             border-radius: var(--seer-radius) !important;
             color: #ffffff !important;
             transition: all 0.25s var(--seer-ease) !important;
 
             &:hover {
-                background: rgba(255, 255, 255, 0.18) !important;
+                background: rgba(255, 255, 255, 0.2) !important;
                 border-color: rgba(255, 255, 255, 0.35) !important;
             }
         }
@@ -1542,10 +1531,10 @@ body.seer-active {
             padding: 0.75em 1em !important;
             color: #ffffff !important;
             font-family: inherit !important;
-            background-color: rgba(0, 0, 0, 0.5) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
             border-radius: 8px !important;
 
             &:focus {
