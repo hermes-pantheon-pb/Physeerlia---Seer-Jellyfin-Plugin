@@ -7,8 +7,8 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <AssemblyTitle>Jellyfin.Plugin.Seer</AssemblyTitle>
     <Description>Overseerr and Jellyseerr integration plugin for Jellyfin</Description>
-    <Version>1.0.3.0</Version>
-    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.4.0</Version>
+    <FileVersion>1.0.4.0</FileVersion>
     <Company>Antigravity</Company>
   </PropertyGroup>
 
