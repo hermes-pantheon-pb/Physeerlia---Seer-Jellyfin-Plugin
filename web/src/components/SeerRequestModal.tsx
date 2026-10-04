@@ -1,4 +1,5 @@
 import React, { FC, useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import {
     SeerMediaItem,
     SeerServer,
@@ -58,6 +59,18 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    // Prevent background content from scrolling while modal is open
+    useEffect(() => {
+        const root = document.getElementById('seerPluginRoot');
+        if (root) {
+            const prevOverflow = root.style.overflowY;
+            root.style.overflowY = 'hidden';
+            return () => {
+                root.style.overflowY = prevOverflow || 'auto';
+            };
+        }
+    }, []);
 
     // 1. Initial load of available servers for this media type
     useEffect(() => {
@@ -295,7 +308,7 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
         }
     };
 
-    return (
+    return ReactDOM.createPortal(
         <div className={`seerModalBackdrop ${isGlassTheme ? 'seerGlassTheme' : ''}`} onClick={onClose}>
             <div className='seerModalContent' onClick={(e) => e.stopPropagation()}>
                 <div className='seerModalHeader'>
@@ -666,6 +679,7 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

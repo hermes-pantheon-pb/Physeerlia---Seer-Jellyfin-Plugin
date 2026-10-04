@@ -1,4 +1,5 @@
 import React, { FC, useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { SeerMediaItem, MediaStatus } from '../types';
 import { seerApi } from '../services/seerApi';
 
@@ -13,6 +14,18 @@ interface SeerMediaDetailModalProps {
 export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onClose, onRequestClick, onBackdropChange, isGlassTheme }) => {
     const [detailItem, setDetailItem] = useState<SeerMediaItem>(item);
     const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
+
+    // Prevent background content from scrolling while modal is open
+    useEffect(() => {
+        const root = document.getElementById('seerPluginRoot');
+        if (root) {
+            const prevOverflow = root.style.overflowY;
+            root.style.overflowY = 'hidden';
+            return () => {
+                root.style.overflowY = prevOverflow || 'auto';
+            };
+        }
+    }, []);
 
     useEffect(() => {
         let isCancelled = false;
@@ -49,8 +62,7 @@ export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onCl
     const year = activeItem.releaseDate ? new Date(activeItem.releaseDate).getFullYear() : '';
     const status = activeItem.mediaInfo?.status;
 
-
-    return (
+    return ReactDOM.createPortal(
         <div className={`seerModalBackdrop ${isGlassTheme ? 'seerGlassTheme' : ''}`} onClick={onClose}>
             <div className='seerModalContent' onClick={(e) => e.stopPropagation()} style={{ maxWidth: '720px' }}>
                 <div className='seerModalHeader'>
@@ -187,6 +199,7 @@ export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onCl
                 </div>
 
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

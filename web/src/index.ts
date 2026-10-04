@@ -69,6 +69,27 @@ import './styles/seer.scss';
         document.body.classList.add('seer-active');
         document.documentElement.classList.add('seer-active');
 
+        // Disconnect MutationObserver to eliminate ALL DOM mutation thrashing while using Seer
+        if (observer) {
+            observer.disconnect();
+        }
+
+        // Immediately hide center library stack and user views in modern MUI topbar
+        const navStack = document.querySelector('header .MuiToolbar-root > .MuiStack-root') as HTMLElement;
+        if (navStack) {
+            navStack.style.setProperty('display', 'none', 'important');
+        }
+        document.querySelectorAll('header [class*="userViews"], header [class*="UserViewNav"], header [class*="ServerButton"]').forEach(el => {
+            (el as HTMLElement).style.setProperty('display', 'none', 'important');
+        });
+        const headerEl = document.querySelector('header, .skinHeader') as HTMLElement;
+        if (headerEl) {
+            headerEl.style.setProperty('background-color', '#101014', 'important');
+            headerEl.style.setProperty('background', '#101014', 'important');
+            headerEl.style.setProperty('backdrop-filter', 'none', 'important');
+            headerEl.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+        }
+
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
@@ -106,11 +127,33 @@ import './styles/seer.scss';
         document.body.classList.remove('seer-active');
         document.documentElement.classList.remove('seer-active');
         window.removeEventListener('resize', updateSeerPosition);
+
+        // Restore modern MUI topbar center stack and user views
+        const navStack = document.querySelector('header .MuiToolbar-root > .MuiStack-root') as HTMLElement;
+        if (navStack) {
+            navStack.style.removeProperty('display');
+        }
+        document.querySelectorAll('header [class*="userViews"], header [class*="UserViewNav"], header [class*="ServerButton"]').forEach(el => {
+            (el as HTMLElement).style.removeProperty('display');
+        });
+        const headerEl = document.querySelector('header, .skinHeader') as HTMLElement;
+        if (headerEl) {
+            headerEl.style.removeProperty('background-color');
+            headerEl.style.removeProperty('background');
+            headerEl.style.removeProperty('backdrop-filter');
+            headerEl.style.removeProperty('-webkit-backdrop-filter');
+        }
+
         if (seerContainer) {
             seerContainer.style.display = 'none';
             ReactDOM.unmountComponentAtNode(seerContainer);
         }
         isSeerOpen = false;
+
+        // Reconnect MutationObserver now that Seer is closed
+        if (observer && document.body) {
+            observer.observe(document.body, { childList: true });
+        }
 
         // Reset button active state & styling
         const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
@@ -382,11 +425,12 @@ import './styles/seer.scss';
         const target = e.target as HTMLElement;
         if (!target) return;
 
-        // 1. If clicking on our Seer button, drawer link, or inside Seer itself, allow normal handling
+        // 1. If clicking on our Seer button, drawer link, inside Seer itself, or any modal portal, allow normal handling
         if (
             target.closest('[data-seer-btn="true"]') ||
             target.closest('[data-seer-drawer="true"]') ||
-            target.closest('#seerPluginRoot')
+            target.closest('#seerPluginRoot') ||
+            target.closest('.seerModalBackdrop')
         ) {
             return;
         }
@@ -465,15 +509,19 @@ import './styles/seer.scss';
     // Instantaneous 0ms injection via requestAnimationFrame-debounced MutationObserver
     let rafScheduled = false;
     function scheduleInjectNavigation() {
+        if (isSeerOpen) return;
         if (rafScheduled) return;
         rafScheduled = true;
         requestAnimationFrame(() => {
             rafScheduled = false;
-            injectNavigation();
+            if (!isSeerOpen) {
+                injectNavigation();
+            }
         });
     }
 
     const observer = new MutationObserver(() => {
+        if (isSeerOpen) return;
         scheduleInjectNavigation();
     });
 
