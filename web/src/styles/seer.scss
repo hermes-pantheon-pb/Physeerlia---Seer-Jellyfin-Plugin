@@ -4,6 +4,22 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
+/* Clean topbar and prevent background bleed-through when Seer is open */
+body.seer-active {
+    .headerTabs,
+    .sectionTabs,
+    header .MuiToolbar-root:nth-of-type(n+2),
+    .headerLeft .pageTitle,
+    .skinHeader .pageTitle {
+        display: none !important;
+    }
+
+    .backgroundContainer {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+}
+
 .seerHeaderMuiBtn,
 .headerButton.headerSeerButton,
 [data-seer-btn="true"] {
@@ -16,7 +32,10 @@
     outline: 0 !important;
     border: 0 !important;
     margin: 0 0.29em !important;
-    border-radius: 50% !important;
+    border-radius: var(--seer-inferred-radius, inherit);
+    padding: var(--seer-inferred-padding, 0.556em);
+    width: var(--seer-inferred-width, auto);
+    height: var(--seer-inferred-height, auto);
     cursor: pointer !important;
     user-select: none !important;
     text-decoration: none !important;
@@ -58,19 +77,13 @@
     }
 }
 
-/* Legacy layout: exact match with stock Jellyfin .headerButton.headerButtonRight */
+/* Legacy layout: exact parity with stock Jellyfin .headerButton.headerButtonRight */
 .headerButton.headerSeerButton {
-    padding: 0.556em !important;
-    width: auto !important;
-    height: auto !important;
-    min-width: initial !important;
-    min-height: initial !important;
-    max-width: initial !important;
-    max-height: initial !important;
-    aspect-ratio: 1 / 1 !important;
-    line-height: 1 !important;
-    vertical-align: middle !important;
-    margin: 0 0.29em !important;
+    min-width: initial;
+    min-height: initial;
+    line-height: 1;
+    vertical-align: middle;
+    margin: 0 0.29em;
 
     .seerHeaderLogoSvg,
     svg {
@@ -79,17 +92,9 @@
     }
 }
 
-/* Modern layout: exact match with Material-UI MuiIconButton-sizeLarge */
+/* Modern layout: exact parity with Material-UI MuiIconButton-sizeLarge */
 .seerHeaderMuiBtn {
-    padding: 12px !important;
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    min-height: 48px !important;
-    max-width: 48px !important;
-    max-height: 48px !important;
-    aspect-ratio: 1 / 1 !important;
-    margin: 0 4px !important;
+    margin: 0 4px;
 
     .seerHeaderLogoSvg,
     svg {
