@@ -4,7 +4,7 @@
   "name": "Physeerlia",
   "description": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into Jellyfin with zero-login SSO delegation.",
   "overview": "Physeerlia brings Overseerr and Jellyseerr directly into the Jellyfin client with zero-login SSO delegation, per-user permission enforcement, and optional Abyss frosted glass styling.",
-  "owner": "peuga",
+  "owner": "hermes-pantheon-pb",
   "targetAbi": "10.9.0.0",
   "version": "1.0.0.0"
 }
