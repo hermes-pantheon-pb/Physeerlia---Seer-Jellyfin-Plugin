@@ -4,6 +4,30 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
+/* Tap Highlight Removal for Mobile WebKit & Chromium */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.seerMediaCard,
+.cardBox,
+.cardScalable,
+.cardImageContainer,
+.cardImage,
+.seerTabButton,
+.seerFilterBtn,
+.seerActionButton,
+.seerHeaderMuiBtn,
+.headerSeerButton,
+[data-seer-btn="true"],
+[data-seer-drawer="true"],
+button,
+a {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-focus-ring-color: transparent !important;
+    outline: none !important;
+}
+
 .seerHeaderMuiBtn,
 .headerButton.headerSeerButton,
 [data-seer-btn="true"] {
@@ -436,6 +460,8 @@ html[data-theme] header.MuiAppBar-root {
     cursor: pointer;
     transition: box-shadow 0.2s ease;
     user-select: none;
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
 
     @media (hover: hover) and (pointer: fine) {
         &:hover {
@@ -645,6 +671,17 @@ html[data-theme] header.MuiAppBar-root {
     animation: modalFadeIn 0.15s ease-out;
 }
 
+@keyframes modalContentSwap {
+    0% {
+        opacity: 0.6;
+        transform: translateY(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .seerModalContent {
     background-color: #18181c !important;
     border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.12));
@@ -657,6 +694,7 @@ html[data-theme] header.MuiAppBar-root {
     flex-direction: column;
     overflow: hidden;
     margin-top: 0;
+    animation: modalContentSwap 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
     form {
         display: flex;
@@ -1521,10 +1559,10 @@ html[data-theme] header.MuiAppBar-root {
         }
     }
 
-    /* Frosted Modals & Dialogs: Clean opaque backdrop to prevent mobile GPU compositor glitches */
+    /* Frosted Modals & Dialogs: Translucent glass dialog card */
     &.seerModalBackdrop,
     .seerModalBackdrop {
-        background-color: rgba(0, 0, 0, 0.85) !important;
+        background-color: rgba(0, 0, 0, 0.65) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         align-items: flex-start !important;
@@ -1536,12 +1574,13 @@ html[data-theme] header.MuiAppBar-root {
 
     .seerModalContent,
     &.seerModalContent {
-        background-color: #18181c !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        background-color: rgba(var(--seer-glass-tint), 0.78) !important;
+        background: rgba(var(--seer-glass-tint), 0.78) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
         border-radius: calc(var(--seer-radius) + 2px) !important;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
         max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px)) !important;
         overflow: hidden !important;
         margin-top: 0 !important;

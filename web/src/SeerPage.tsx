@@ -7,6 +7,7 @@ import { SeerSettings } from './components/SeerSettings';
 import { SeerLogin } from './components/SeerLogin';
 import { SeerMediaDetailModal } from './components/SeerMediaDetailModal';
 import { SeerRequestModal } from './components/SeerRequestModal';
+import { SeerModalWrapper } from './components/SeerModalWrapper';
 import { seerApi } from './services/seerApi';
 import './styles/seer.scss';
 
@@ -270,12 +271,26 @@ export const SeerPage: FC<SeerPageProps> = ({ onClose }) => {
         }
     };
 
-    const handleOpenRequestModal = (item: SeerMediaItem) => {
+    const handleCloseModal = () => {
         setSelectedMediaForDetail(null);
+        setSelectedMediaForRequest(null);
+        if (backdropsEnabled && trendingBackdropsRef.current.length > 0) {
+            restoreBackdropImages(trendingBackdropsRef.current);
+        } else if (!backdropsEnabled) {
+            clearBackdrop();
+        }
+    };
+
+    const handleOpenRequestModal = (item: SeerMediaItem) => {
         setSelectedMediaForRequest(item);
     };
 
+    const handleBackToDetail = () => {
+        setSelectedMediaForRequest(null);
+    };
+
     const handleRequestSuccess = () => {
+        handleCloseModal();
         setRefreshRequestsKey(prev => prev + 1);
         showToast('Request submitted successfully! Tracking status in Requests tab.');
     };
@@ -461,36 +476,34 @@ export const SeerPage: FC<SeerPageProps> = ({ onClose }) => {
                     </>
                 )}
 
-                {/* Detail Modal */}
-                {selectedMediaForDetail && (
-                    <SeerMediaDetailModal
-                        item={selectedMediaForDetail}
+                {/* Unified Persistent Modal Overlay (Seamless Backdrop & Zero Flash) */}
+                {(selectedMediaForDetail || selectedMediaForRequest) && (
+                    <SeerModalWrapper
                         isGlassTheme={glassThemeEnabled}
-                        onClose={() => {
-                            setSelectedMediaForDetail(null);
-                            if (backdropsEnabled && trendingBackdropsRef.current.length > 0) {
-                                restoreBackdropImages(trendingBackdropsRef.current);
-                            } else if (!backdropsEnabled) {
-                                clearBackdrop();
-                            }
-                        }}
-                        onRequestClick={handleOpenRequestModal}
-                        onBackdropChange={(url) => {
-                            if (backdropsEnabled && url) {
-                                setBackdrop(url);
-                            }
-                        }}
-                    />
-                )}
-
-                {/* Request Modal with Dynamic Permission Settings */}
-                {selectedMediaForRequest && (
-                    <SeerRequestModal
-                        item={selectedMediaForRequest}
-                        isGlassTheme={glassThemeEnabled}
-                        onClose={() => setSelectedMediaForRequest(null)}
-                        onRequestSuccess={handleRequestSuccess}
-                    />
+                        onClose={handleCloseModal}
+                    >
+                        {selectedMediaForRequest ? (
+                            <SeerRequestModal
+                                item={selectedMediaForRequest}
+                                isGlassTheme={glassThemeEnabled}
+                                onClose={handleCloseModal}
+                                onBack={selectedMediaForDetail ? handleBackToDetail : undefined}
+                                onRequestSuccess={handleRequestSuccess}
+                            />
+                        ) : selectedMediaForDetail ? (
+                            <SeerMediaDetailModal
+                                item={selectedMediaForDetail}
+                                isGlassTheme={glassThemeEnabled}
+                                onClose={handleCloseModal}
+                                onRequestClick={handleOpenRequestModal}
+                                onBackdropChange={(url) => {
+                                    if (backdropsEnabled && url) {
+                                        setBackdrop(url);
+                                    }
+                                }}
+                            />
+                        ) : null}
+                    </SeerModalWrapper>
                 )}
             </div>
         </Page>

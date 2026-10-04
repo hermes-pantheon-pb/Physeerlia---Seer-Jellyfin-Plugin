@@ -62,10 +62,9 @@ export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onCl
     const year = activeItem.releaseDate ? new Date(activeItem.releaseDate).getFullYear() : '';
     const status = activeItem.mediaInfo?.status;
 
-    return ReactDOM.createPortal(
-        <div className={`seerModalBackdrop ${isGlassTheme ? 'seerGlassTheme' : ''}`} onClick={onClose}>
-            <div className='seerModalContent' onClick={(e) => e.stopPropagation()} style={{ maxWidth: '720px' }}>
-                <div className='seerModalHeader'>
+    return (
+        <div className={`seerModalContent ${isGlassTheme ? 'seerGlassTheme' : ''}`} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '720px' }}>
+            <div className='seerModalHeader'>
                     <h2>{activeItem.title}</h2>
                     <button className='closeButton' onClick={onClose} aria-label='Close'>&times;</button>
                 </div>
@@ -186,10 +185,7 @@ export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onCl
                     <button
                         type='button'
                         className='submitBtn'
-                        onClick={() => {
-                            onClose();
-                            onRequestClick(activeItem);
-                        }}
+                        onClick={() => onRequestClick(activeItem)}
                     >
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                             <span className='material-icons' style={{ fontSize: '1.1em' }}>add_circle</span>
@@ -199,7 +195,5 @@ export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onCl
                 </div>
 
             </div>
-        </div>,
-        document.body
     );
 };

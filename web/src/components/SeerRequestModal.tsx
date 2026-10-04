@@ -21,13 +21,14 @@ import {
 interface SeerRequestModalProps {
     item: SeerMediaItem;
     onClose: () => void;
+    onBack?: () => void;
     onRequestSuccess: () => void;
     isGlassTheme?: boolean;
 }
 
 type SeasonSelectionMode = 'all' | 'first' | 'latest' | 'custom';
 
-export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onRequestSuccess, isGlassTheme }) => {
+export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onBack, onRequestSuccess, isGlassTheme }) => {
     const currentUser = seerApi.getCurrentUser();
     const permissions = currentUser?.permissions || 0;
 
@@ -308,10 +309,9 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
         }
     };
 
-    return ReactDOM.createPortal(
-        <div className={`seerModalBackdrop ${isGlassTheme ? 'seerGlassTheme' : ''}`} onClick={onClose}>
-            <div className='seerModalContent' onClick={(e) => e.stopPropagation()}>
-                <div className='seerModalHeader'>
+    return (
+        <div className={`seerModalContent ${isGlassTheme ? 'seerGlassTheme' : ''}`} onClick={(e) => e.stopPropagation()}>
+            <div className='seerModalHeader'>
                     <h2>Request {item.mediaType === 'tv' ? 'Series' : 'Movie'}</h2>
                     <button className='closeButton' onClick={onClose} aria-label='Close'>&times;</button>
                 </div>
@@ -666,6 +666,18 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                     </div>
 
                     <div className='seerModalFooter'>
+                        {onBack && (
+                            <button
+                                type='button'
+                                className='cancelBtn'
+                                onClick={onBack}
+                                disabled={isSubmitting}
+                                style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.3em' }}
+                            >
+                                <span className='material-icons' style={{ fontSize: '18px' }}>arrow_back</span>
+                                Back
+                            </button>
+                        )}
                         <button type='button' className='cancelBtn' onClick={onClose} disabled={isSubmitting}>
                             Cancel
                         </button>
@@ -679,7 +691,5 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                     </div>
                 </form>
             </div>
-        </div>,
-        document.body
     );
 };
