@@ -11,7 +11,7 @@
         "version": "1.0.0.0",
         "targetAbi": "10.9.0.0",
         "sourceUrl": "https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/releases/download/v1.0.0.0/jellyfin-plugin-seer.zip",
-        "checksum": "d87e40a15973d9b97a4b4b0ff01317d8",
+        "checksum": "78dd9219904aa6cbd60585fc9805a0e2",
         "changelog": "Initial production release with automatic SSO delegation, in-memory web injection, and per-user permission enforcement.",
         "timestamp": "2026-10-03T18:00:00Z"
       }
