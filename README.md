@@ -1,4 +1,8 @@
-# Physeerlia - Seer Jellyfin Plugin
+<p align="center">
+  <img src="docs/images/logo.png" alt="Physeerlia logo" width="160" />
+</p>
+
+<h1 align="center">Physeerlia - Seer Jellyfin Plugin</h1>
 
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![Target: Jellyfin 10.9+](https://img.shields.io/badge/Jellyfin-10.9%2B-5271ff.svg)](https://jellyfin.org/)
@@ -47,6 +51,25 @@ Given that this project is relatively new and was created first and foremost for
 
 ---
 
+## 📸 Screenshots
+
+### Discovery
+Trending and popular releases live on their own dedicated Seer page inside the Jellyfin web client, with status badges (e.g. *Requested*) on each card, Movie/Series filters, infinite scroll, and the optional frosted glass UI.
+
+![Discovery page](docs/images/discovery.png)
+
+### Media Details
+Clicking a poster opens a details dialog with the overview, year, rating, and a one-click **Request Media** button, over a blurred, dimmed backdrop.
+
+![Media details dialog](docs/images/media-details.png)
+
+### Request Form & Advanced Delegation
+Users with the right Seer permissions get **Advanced Delegation Settings** (destination server, root folder, quality profile) plus a 4K toggle. Requests are submitted as the logged-in user, and the form shows whether the request will be auto-approved.
+
+![Request form with advanced options](docs/images/request-form.png)
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -78,6 +101,7 @@ Given that this project is relatively new and was created first and foremost for
 
 ```
 jellyfin-plugin-seer/
+├── docs/images/                    # README screenshots & plugin logo
 ├── src/
 │   └── Jellyfin.Plugin.Seer/       # C# .NET Server Plugin
 │       ├── Configuration/

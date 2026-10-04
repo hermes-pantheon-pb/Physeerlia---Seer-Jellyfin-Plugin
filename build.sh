@@ -22,6 +22,7 @@ if command -v dotnet >/dev/null 2>&1; then
     mkdir -p dist/package
     cp src/Jellyfin.Plugin.Seer/bin/Release/net8.0/Jellyfin.Plugin.Seer.dll dist/package/
     cp meta.json dist/package/
+    cp docs/images/logo.png dist/package/logo.png
     (cd dist/package && python3 -m zipfile -c ../../jellyfin-plugin-seer.zip .)
 
     # Calculate MD5 checksum
