@@ -109,33 +109,19 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     continue;
                 }
 
+                // Only versioned folders of the form "<Name>_<Version>" that are STRICTLY OLDER
+                // than the running assembly are considered stale. Newer or unversioned folders
+                // are never touched (an older copy loaded side by side must not delete a newer one).
                 bool isStalePlugin = false;
-
-                // Check directory name prefix
-                if (dirName.StartsWith("Physeerlia", StringComparison.OrdinalIgnoreCase) ||
-                    dirName.StartsWith("Jellyfin.Plugin.Seer", StringComparison.OrdinalIgnoreCase))
+                var currentVersion = typeof(Plugin).Assembly.GetName().Version;
+                var underscore = dirName.LastIndexOf('_');
+                if (currentVersion != null
+                    && underscore > 0
+                    && dirName.Substring(0, underscore).Equals("Physeerlia", StringComparison.OrdinalIgnoreCase)
+                    && Version.TryParse(dirName.Substring(underscore + 1), out var dirVersion)
+                    && dirVersion < currentVersion)
                 {
                     isStalePlugin = true;
-                }
-                else
-                {
-                    // Check if meta.json has our GUID
-                    var metaPath = Path.Combine(dir, "meta.json");
-                    if (File.Exists(metaPath))
-                    {
-                        try
-                        {
-                            var content = File.ReadAllText(metaPath);
-                            if (content.IndexOf("b1b87a2a-4db3-4fc9-b59a-143c7b39922e", StringComparison.OrdinalIgnoreCase) >= 0)
-                            {
-                                isStalePlugin = true;
-                            }
-                        }
-                        catch
-                        {
-                            // ignore file read error
-                        }
-                    }
                 }
 
                 if (isStalePlugin)
