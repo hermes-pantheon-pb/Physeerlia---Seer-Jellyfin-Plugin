@@ -13,18 +13,19 @@ import './styles/seer.scss';
 
     /**
      * Dynamically synchronizes the Seer icon button styling with the active Jellyfin theme.
-     * Accurately infers color, border-radius, padding, and bounding dimensions from neighboring toolbar icons.
+     * Accurately infers color and active state from neighboring toolbar icons.
      */
     function syncButtonTheme(btn: HTMLElement, refBtn: HTMLElement | null) {
         if (!btn) return;
 
         if (isSeerOpen) {
             btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+            return;
         }
 
-        // Safely inspect reference button or neighboring icons for any explicit theme styling
+        btn.classList.remove('active');
+
+        // Safely inspect reference button or neighboring icons for any explicit theme colors
         try {
             const ref = refBtn || document.querySelector('header a.MuiIconButton-colorInherit, header button.MuiIconButton-colorInherit, .headerRight .headerButton');
             if (ref) {
@@ -32,19 +33,6 @@ import './styles/seer.scss';
                 const color = comp.color;
                 if (color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
                     btn.style.setProperty('--seer-inferred-color', color);
-                }
-                if (comp.borderRadius && comp.borderRadius !== '0px') {
-                    btn.style.setProperty('--seer-inferred-radius', comp.borderRadius);
-                }
-                if (comp.padding) {
-                    btn.style.setProperty('--seer-inferred-padding', comp.padding);
-                }
-                // Check if reference button has specific bounding dimensions (e.g. oval / rectangle)
-                // and mirror them to maintain exact visual parity across themes
-                const refRect = ref.getBoundingClientRect();
-                if (refRect.width > 0 && refRect.height > 0) {
-                    btn.style.setProperty('--seer-inferred-width', `${Math.round(refRect.width)}px`);
-                    btn.style.setProperty('--seer-inferred-height', `${Math.round(refRect.height)}px`);
                 }
             }
         } catch (e) {
@@ -57,20 +45,14 @@ import './styles/seer.scss';
     }
 
     function getHeaderOffset(): number {
-        // Measure primary toolbar rather than extended 8em gradient masks from themes like Abyss
-        const primaryBar = document.querySelector('header .MuiToolbar-root:first-of-type, .skinHeader .headerTop');
-        if (primaryBar) {
-            const rect = primaryBar.getBoundingClientRect();
-            if (rect.bottom > 0) {
-                return Math.ceil(rect.bottom);
-            }
-        }
         const header = document.querySelector('header, .skinHeader:not([class*="hide"]):not([style*="display: none"])');
         if (header) {
             const rect = header.getBoundingClientRect();
-            const height = rect.bottom > 0 ? rect.bottom : rect.height;
-            if (height > 0) {
-                return Math.min(Math.ceil(height), 72);
+            if (rect.bottom > 0) {
+                return Math.ceil(rect.bottom);
+            }
+            if (rect.height > 0) {
+                return Math.ceil(rect.height);
             }
         }
         return 64;
@@ -79,23 +61,20 @@ import './styles/seer.scss';
     function updateSeerPosition() {
         if (!seerContainer) return;
         const topOffset = getHeaderOffset();
-        seerContainer.style.setProperty('--seer-top-offset', `${topOffset}px`);
+        seerContainer.style.top = `${topOffset}px`;
+        seerContainer.style.height = `calc(100vh - ${topOffset}px)`;
     }
 
     function openSeer() {
-        document.body.classList.add('seer-active');
-        document.documentElement.classList.add('seer-active');
-
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
             seerContainer.className = 'page type-interior seerPageRoot';
             seerContainer.style.position = 'fixed';
-            seerContainer.style.top = '0';
             seerContainer.style.left = '0';
             seerContainer.style.right = '0';
             seerContainer.style.bottom = '0';
-            seerContainer.style.zIndex = '950';
+            seerContainer.style.zIndex = '1050';
             seerContainer.style.overflowY = 'auto';
             seerContainer.style.overflowX = 'hidden';
             document.body.appendChild(seerContainer);
@@ -121,9 +100,6 @@ import './styles/seer.scss';
     }
 
     function closeSeer(revertHistory = true) {
-        document.body.classList.remove('seer-active');
-        document.documentElement.classList.remove('seer-active');
-
         window.removeEventListener('resize', updateSeerPosition);
         if (seerContainer) {
             seerContainer.style.display = 'none';
@@ -133,7 +109,7 @@ import './styles/seer.scss';
 
         // Reset button active state & styling
         const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
-        const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i], .headerSearchButton') as HTMLElement;
+        const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i]') as HTMLElement;
         if (btn) syncButtonTheme(btn, searchBtn);
 
         // Remove withBackdrop from native background container if present

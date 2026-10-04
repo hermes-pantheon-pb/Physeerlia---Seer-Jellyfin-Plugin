@@ -4,22 +4,6 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
-/* Clean topbar and prevent background bleed-through when Seer is open */
-body.seer-active {
-    .headerTabs,
-    .sectionTabs,
-    header .MuiToolbar-root:nth-of-type(n+2),
-    .headerLeft .pageTitle,
-    .skinHeader .pageTitle {
-        display: none !important;
-    }
-
-    .backgroundContainer {
-        opacity: 0 !important;
-        visibility: hidden !important;
-    }
-}
-
 .seerHeaderMuiBtn,
 .headerButton.headerSeerButton,
 [data-seer-btn="true"] {
@@ -32,10 +16,7 @@ body.seer-active {
     outline: 0 !important;
     border: 0 !important;
     margin: 0 0.29em !important;
-    border-radius: var(--seer-inferred-radius, inherit);
-    padding: var(--seer-inferred-padding, 0.556em);
-    width: var(--seer-inferred-width, auto);
-    height: var(--seer-inferred-height, auto);
+    border-radius: 50% !important;
     cursor: pointer !important;
     user-select: none !important;
     text-decoration: none !important;
@@ -77,13 +58,19 @@ body.seer-active {
     }
 }
 
-/* Legacy layout: exact parity with stock Jellyfin .headerButton.headerButtonRight */
+/* Legacy layout: exact match with stock Jellyfin .headerButton.headerButtonRight */
 .headerButton.headerSeerButton {
-    min-width: initial;
-    min-height: initial;
-    line-height: 1;
-    vertical-align: middle;
-    margin: 0 0.29em;
+    padding: 0.556em !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: initial !important;
+    min-height: initial !important;
+    max-width: initial !important;
+    max-height: initial !important;
+    aspect-ratio: 1 / 1 !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    margin: 0 0.29em !important;
 
     .seerHeaderLogoSvg,
     svg {
@@ -92,9 +79,17 @@ body.seer-active {
     }
 }
 
-/* Modern layout: exact parity with Material-UI MuiIconButton-sizeLarge */
+/* Modern layout: exact match with Material-UI MuiIconButton-sizeLarge */
 .seerHeaderMuiBtn {
-    margin: 0 4px;
+    padding: 12px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 4px !important;
 
     .seerHeaderLogoSvg,
     svg {
@@ -209,23 +204,27 @@ body.seer-active {
 }
 
 #seerPluginRoot {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    z-index: 950 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    background-color: var(--jf-palette-background-default, #121212) !important;
-    box-sizing: border-box !important;
+    position: fixed;
+    top: 4.2em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: var(--jf-palette-background-default, #121212);
+    box-sizing: border-box;
+
+    &.withBackdrop {
+        background-color: transparent !important;
+    }
 }
 
 .seerContainer {
-    padding-top: calc(var(--seer-top-offset, 64px) + 1.2em) !important;
+    padding-top: 1.8em !important;
     padding-bottom: 4em;
     color: var(--jf-palette-text-primary, #fff);
-    min-height: 100vh;
+    min-height: calc(100vh - 4.5em);
     background: transparent;
     position: relative;
     z-index: 1;
@@ -553,7 +552,7 @@ body.seer-active {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 2000 !important;
+    z-index: 1000;
     display: flex;
     align-items: flex-start;
     justify-content: center;
