@@ -44,10 +44,28 @@ import './styles/seer.scss';
         btn.style.removeProperty('opacity');
     }
 
-    function openSeer() {
+    function getHeaderOffset(): number {
         const header = document.querySelector('header, .skinHeader:not([class*="hide"]):not([style*="display: none"])');
-        const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 48;
+        if (header) {
+            const rect = header.getBoundingClientRect();
+            if (rect.bottom > 0) {
+                return Math.ceil(rect.bottom);
+            }
+            if (rect.height > 0) {
+                return Math.ceil(rect.height);
+            }
+        }
+        return 64;
+    }
 
+    function updateSeerPosition() {
+        if (!seerContainer) return;
+        const topOffset = getHeaderOffset();
+        seerContainer.style.top = `${topOffset}px`;
+        seerContainer.style.height = `calc(100vh - ${topOffset}px)`;
+    }
+
+    function openSeer() {
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
@@ -62,8 +80,8 @@ import './styles/seer.scss';
             document.body.appendChild(seerContainer);
         }
 
-        seerContainer.style.top = `${headerHeight}px`;
-        seerContainer.style.height = `calc(100vh - ${headerHeight}px)`;
+        updateSeerPosition();
+        window.addEventListener('resize', updateSeerPosition);
         seerContainer.style.display = 'block';
         isSeerOpen = true;
 
@@ -82,6 +100,7 @@ import './styles/seer.scss';
     }
 
     function closeSeer(revertHistory = true) {
+        window.removeEventListener('resize', updateSeerPosition);
         if (seerContainer) {
             seerContainer.style.display = 'none';
             ReactDOM.unmountComponentAtNode(seerContainer);
@@ -103,7 +122,7 @@ import './styles/seer.scss';
         console.debug('[SeerPlugin] Seer view unmounted');
     }
 
-    const SEER_ICON_SVG = '<svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor; display: block;"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l3.2 3.2 1.4-1.4zm-3.8.1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M12 20v2C6.48 22 2 17.52 2 12S6.48 2 12 2c4.84 0 8.87 3.44 9.8 8h-2.07c-.64-2.46-2.4-4.47-4.73-5.41V5c0 1.1-.9 2-2 2h-2v2c0 .55-.45 1-1 1H8v2h2v3H9l-4.79-4.79C4.08 10.79 4 11.38 4 12c0 4.41 3.59 8 8 8"></path></svg>';
+    const SEER_ICON_SVG = '<svg class="seerHeaderLogoSvg" width="24" height="24" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="pointer-events: none; width: 24px; height: 24px; display: block;"><circle cx="48" cy="48" r="28" fill="currentColor" opacity="0.25"/><path fill-rule="evenodd" clip-rule="evenodd" d="M48 96C74.5097 96 96 74.5097 96 48C96 21.4903 74.5097 0 48 0C21.4903 0 0 21.4903 0 48C0 74.5097 21.4903 96 48 96ZM76.0001 48C76.0001 63.464 63.4641 76 48.0001 76C32.5361 76 20.0001 63.464 20.0001 48C20.0001 45.1303 20.4318 42.3615 21.2338 39.7548C23.4288 44.6165 28.3194 48 34.0001 48C41.7321 48 48.0001 41.732 48.0001 34C48.0001 28.3192 44.6166 23.4287 39.755 21.2337C42.3616 20.4317 45.1304 20 48.0001 20C63.4641 20 76.0001 32.536 76.0001 48Z" fill="currentColor"/></svg>';
 
     /**
      * Checks if the active view is within the server administration dashboard.
@@ -227,10 +246,10 @@ import './styles/seer.scss';
             btn.setAttribute('is', 'paper-icon-button-light');
             btn.setAttribute('data-seer-btn', 'true');
             btn.id = 'headerSeerBtn';
-            btn.className = 'headerButton headerButtonRight headerButton-plantitle headerSeerButton paper-icon-button-light';
+            btn.className = 'headerButton headerButtonRight headerSeerButton paper-icon-button-light';
             btn.title = 'Requests & Discovery (Seer)';
             btn.setAttribute('aria-label', 'Requests & Discovery (Seer)');
-            btn.innerHTML = `<span class="material-icons" aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em;">${SEER_ICON_SVG}</span>`;
+            btn.innerHTML = SEER_ICON_SVG;
 
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -268,6 +287,12 @@ import './styles/seer.scss';
         const homeLink = document.querySelector('.MuiDrawer-root a[href*="/home"], nav a[href*="/home"]');
         const modernList = homeLink?.closest('.MuiList-root');
         if (modernList) {
+            const li = document.createElement('li');
+            li.setAttribute('data-seer-drawer', 'true');
+            li.className = 'MuiListItem-root MuiListItem-gutters';
+            li.style.padding = '0';
+            li.style.display = 'block';
+
             const item = document.createElement('div');
             item.setAttribute('data-seer-drawer', 'true');
             item.className = 'MuiButtonBase-root MuiListItemButton-root MuiListItemButton-gutters';
@@ -276,16 +301,18 @@ import './styles/seer.scss';
                 e.preventDefault();
                 e.stopPropagation();
                 openSeer();
+                closeActiveDrawers();
             };
             item.innerHTML = `
-                <div class="MuiListItemIcon-root" style="min-width: 40px; color: inherit;">
+                <div class="MuiListItemIcon-root" style="min-width: 40px; width: 40px; height: 40px; color: inherit; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     ${SEER_ICON_SVG}
                 </div>
-                <div class="MuiListItemText-root">
+                <div class="MuiListItemText-root" style="margin: 0; flex: 1 1 auto;">
                     <span class="MuiTypography-root MuiTypography-body1">Requests & Discovery</span>
                 </div>
             `;
-            modernList.appendChild(item);
+            li.appendChild(item);
+            modernList.appendChild(li);
             return;
         }
 
@@ -300,34 +327,95 @@ import './styles/seer.scss';
                 e.preventDefault();
                 e.stopPropagation();
                 openSeer();
+                closeActiveDrawers();
             };
-            link.innerHTML = `<span class="material-icons navMenuOptionIcon" aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em; margin-right: 0.8em;">${SEER_ICON_SVG}</span><span class="navMenuOptionText">Requests & Discovery</span>`;
+            link.innerHTML = `<span class="material-icons navMenuOptionIcon" aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; max-width: 24px; max-height: 24px; margin-right: 0.8em; flex-shrink: 0;">${SEER_ICON_SVG}</span><span class="navMenuOptionText">Requests & Discovery</span>`;
             legacyDrawer.appendChild(link);
         }
     }
 
+    function closeActiveDrawers() {
+        // 1. Modern MUI Drawer (Dismiss backdrop or dispatch Escape)
+        const muiDrawer = document.querySelector('.MuiDrawer-root');
+        if (muiDrawer) {
+            const backdrop = muiDrawer.querySelector<HTMLElement>('.MuiBackdrop-root') ||
+                             document.querySelector<HTMLElement>('.MuiBackdrop-root');
+            if (backdrop) {
+                try {
+                    backdrop.click();
+                } catch (e) {
+                    console.debug('[SeerPlugin] backdrop click error', e);
+                }
+            } else {
+                try {
+                    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+                } catch (e) {}
+            }
+        }
+
+        // 2. Legacy Drawer (.tmla-mask or .mainDrawerButton)
+        const legacyMask = document.querySelector<HTMLElement>('.tmla-mask:not(.hide)');
+        if (legacyMask) {
+            try {
+                legacyMask.click();
+            } catch (e) {}
+        }
+        const legacyCloseBtn = document.querySelector<HTMLElement>('.mainDrawerButton:not(.hide)');
+        const legacyDrawer = document.querySelector('.mainDrawer:not(.hide)');
+        if (legacyDrawer && legacyCloseBtn) {
+            try {
+                legacyCloseBtn.click();
+            } catch (e) {}
+        }
+    }
+
     // Top Bar & Navigation Click Interception:
-    // If the user clicks on Home, Series, Movies, Search, or any other header/drawer item
-    // while Seer is open, immediately close Seer so Jellyfin's requested view renders cleanly.
+    // If the user clicks on Home, Series, Movies, Search, or any other navigation link
+    // while Seer is open, close Seer so Jellyfin's requested view renders cleanly.
     document.addEventListener('click', (e) => {
         if (!isSeerOpen) return;
         const target = e.target as HTMLElement;
         if (!target) return;
 
-        // If clicking on our Seer button or inside the Seer page, let normal handling occur
-        if (target.closest('[data-seer-btn="true"]') || target.closest('#seerPluginRoot')) {
+        // 1. If clicking on our Seer button, drawer link, or inside Seer itself, allow normal handling
+        if (
+            target.closest('[data-seer-btn="true"]') ||
+            target.closest('[data-seer-drawer="true"]') ||
+            target.closest('#seerPluginRoot')
+        ) {
             return;
         }
 
-        // If user clicks anywhere on Jellyfin header, toolbar, navigation drawer, or search
+        // 2. If clicking on any backdrop, mask, or container background (dismissing overlays), DO NOT close Seer!
         if (
-            target.closest('header') ||
-            target.closest('.skinHeader') ||
-            target.closest('.mainDrawer') ||
-            target.closest('.MuiDrawer-root') ||
-            target.closest('nav')
+            target.closest('.MuiBackdrop-root') ||
+            target.closest('.tmla-mask') ||
+            target.classList.contains('MuiBackdrop-root') ||
+            target.classList.contains('tmla-mask') ||
+            target.classList.contains('MuiModal-root') ||
+            target.classList.contains('MuiDrawer-root')
         ) {
-            console.debug('[SeerPlugin] Navigation click detected in top bar/drawer, closing Seer view');
+            return;
+        }
+
+        // 3. Only close Seer if an actual navigation link or header action button was clicked
+        const isNavLink = target.closest('a[href]:not([data-seer-drawer="true"])');
+        const isHeaderAction = target.closest(
+            '.headerSearchButton, ' +
+            'header a[href*="/search"], ' +
+            'header button[aria-label*="Search" i], ' +
+            '.headerUserButton, ' +
+            'header button[aria-label*="User" i], ' +
+            '.headerCastButton, ' +
+            'header button[aria-label*="Cast" i]'
+        );
+        const isDrawerNavItem = target.closest(
+            '.MuiListItemButton-root:not([data-seer-drawer="true"]), ' +
+            '.navMenuOption:not([data-seer-drawer="true"])'
+        );
+
+        if (isNavLink || isHeaderAction || isDrawerNavItem) {
+            console.debug('[SeerPlugin] Navigation click detected away from Seer, closing Seer view');
             closeSeer(false);
         }
     }, true);
@@ -400,13 +488,5 @@ import './styles/seer.scss';
     if (window.location.hash === '#seer') {
         setTimeout(openSeer, 300);
     }
-
-    // Heartbeat fallback to catch any async router state transitions
-    setInterval(() => {
-        if (isSeerOpen && window.location.hash !== '#seer' && !window.location.pathname.endsWith('/seer')) {
-            closeSeer(false);
-        }
-        scheduleInjectNavigation();
-    }, 800);
 })();
 

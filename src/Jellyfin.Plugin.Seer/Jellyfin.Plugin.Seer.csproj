@@ -12,14 +12,21 @@
     <Company>Antigravity</Company>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <PathMap>$(MSBuildProjectDirectory)=/src</PathMap>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.9.*" />
     <PackageReference Include="Jellyfin.Model" Version="10.9.*" />
   </ItemGroup>
 
-  <ItemGroup>
+    <ItemGroup>
     <EmbeddedResource Include="Configuration/configPage.html" />
-    <EmbeddedResource Include="Configuration/configPage.js" />
     <EmbeddedResource Include="Web/seer.bundle.js" Condition="Exists('Web/seer.bundle.js')" />
     <EmbeddedResource Include="Web/seer.bundle.css" Condition="Exists('Web/seer.bundle.css')" />
   </ItemGroup>

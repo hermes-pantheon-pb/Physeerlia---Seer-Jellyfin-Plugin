@@ -15,27 +15,15 @@ import {
     LoginCredentials
 } from '../types';
 
-import {
-    canAutoApprove,
-    hasPermission,
-    SeerPermission
-} from '../seerPermissions';
-
 const STORAGE_KEYS = {
-    URL: 'seer_server_url',
     USER: 'seer_session_user'
 };
 
 class SeerApiService {
-    private serverUrl: string;
     private currentUser: SeerUser | null = null;
     private mediaCache: Map<string, SeerMediaItem> = new Map();
 
-
     constructor() {
-        // Default to the user's Seer server URL
-        this.serverUrl = localStorage.getItem(STORAGE_KEYS.URL) || 'http://localhost:5055';
-
         // Restore cached user session if present
         const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
         if (storedUser) {
@@ -50,15 +38,6 @@ class SeerApiService {
                 this.currentUser = null;
             }
         }
-    }
-
-    public getServerUrl(): string {
-        return this.serverUrl;
-    }
-
-    public setServerUrl(url: string) {
-        this.serverUrl = url.trim().replace(/\/+$/, '');
-        localStorage.setItem(STORAGE_KEYS.URL, this.serverUrl);
     }
 
     public isAuthenticated(): boolean {
@@ -84,20 +63,86 @@ class SeerApiService {
     }
 
     /**
+     * Extracts active Jellyfin credentials from ApiClient, ServerConnections, or localStorage.
+     */
+    private getJellyfinAuth(): { token: string | null; authHeader: string | null } {
+        const w = window as any;
+        let token: string | null = null;
+        let authHeader: string | null = null;
+
+        // 1. Check ApiClient or ServerConnections
+        const client = w.ApiClient || w.ServerConnections?.currentApiClient?.();
+        if (client) {
+            try {
+                if (typeof client.accessToken === 'function') {
+                    token = client.accessToken() || null;
+                }
+                const h: Record<string, string> = {};
+                if (typeof client.setRequestHeaders === 'function') {
+                    client.setRequestHeaders(h);
+                    if (h.Authorization) authHeader = h.Authorization;
+                }
+            } catch (e) {
+                console.debug('[SeerApi] Error inspecting ApiClient:', e);
+            }
+        }
+
+        // 2. Fallback to localStorage 'jellyfin_credentials'
+        if (!token) {
+            try {
+                const raw = localStorage.getItem('jellyfin_credentials');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const s = parsed?.Servers?.[0];
+                    if (s?.AccessToken) {
+                        token = s.AccessToken;
+                    }
+                }
+            } catch {}
+        }
+
+        return { token, authHeader };
+    }
+
+    /**
      * Resolves the request URL through the local reverse proxy to bypass browser CORS
      */
     private getEndpoint(path: string): string {
         const cleanPath = path.startsWith('/') ? path : '/' + path;
-        return `/Plugins/Seer/Proxy${cleanPath}`;
+        const subpath = `Plugins/Seer/Proxy${cleanPath}`;
+        const w = window as any;
+        const client = w.ApiClient || w.ServerConnections?.currentApiClient?.();
+        if (client && typeof client.getUrl === 'function') {
+            return client.getUrl(subpath);
+        }
+        return `/${subpath}`;
     }
 
     /**
-     * Helper to perform authenticated requests to Seer through the reverse proxy
+     * Helper to perform authenticated requests to Seer through the Jellyfin reverse proxy.
+     * Automatically passes the active Jellyfin access token for transparent user-mapped delegation.
      */
     private async request(path: string, options: RequestInit = {}): Promise<Response> {
-        const url = this.getEndpoint(path);
+        let url = this.getEndpoint(path);
         const headers = new Headers(options.headers || {});
-        headers.set('X-Seer-Url', this.serverUrl);
+        const { token, authHeader } = this.getJellyfinAuth();
+
+        if (token) {
+            headers.set('X-Emby-Token', token);
+            headers.set('X-MediaBrowser-Token', token);
+            // Append api_key query parameter as secondary fallback for strict reverse proxies
+            const separator = url.includes('?') ? '&' : '?';
+            url += `${separator}api_key=${encodeURIComponent(token)}`;
+        }
+
+        if (authHeader) {
+            headers.set('Authorization', authHeader);
+            headers.set('X-Emby-Authorization', authHeader);
+        } else if (token) {
+            const fallbackAuth = `MediaBrowser Client="Jellyfin Web", Device="Browser", DeviceId="browser", Version="1.0.0", Token="${token}"`;
+            headers.set('Authorization', fallbackAuth);
+            headers.set('X-Emby-Authorization', fallbackAuth);
+        }
 
         return fetch(url, {
             ...options,
@@ -110,9 +155,6 @@ class SeerApiService {
      * Test connection to Seer server status endpoint
      */
     public async testConnection(): Promise<{ success: boolean; message: string; version?: string }> {
-        if (!this.serverUrl) {
-            return { success: false, message: 'Server URL is not configured' };
-        }
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -143,10 +185,6 @@ class SeerApiService {
      * Authenticate user session with Seer
      */
     public async login(credentials: LoginCredentials): Promise<{ success: boolean; user?: SeerUser; message?: string }> {
-        if (credentials.serverUrl) {
-            this.setServerUrl(credentials.serverUrl);
-        }
-
         const endpoint = credentials.authProvider === 'local'
             ? '/api/v1/auth/local'
             : '/api/v1/auth/jellyfin';
@@ -383,7 +421,6 @@ class SeerApiService {
         return [];
     }
 
-
     public async getServers(mediaType: MediaType): Promise<SeerServer[]> {
         const endpoint = mediaType === 'movie' ? '/api/v1/service/radarr' : '/api/v1/service/sonarr';
         try {
@@ -458,59 +495,6 @@ class SeerApiService {
         return { profiles: [], rootFolders: [] };
     }
 
-    public async getProfiles(mediaType: MediaType = 'movie', serverId?: number): Promise<SeerProfile[]> {
-        const servers = await this.getServers(mediaType);
-        if (servers.length === 0) return [];
-
-        const targetServer = serverId !== undefined
-            ? servers.find(s => s.id === serverId)
-            : (servers.find(s => s.isDefault) || servers[0]);
-
-        if (!targetServer) return [];
-
-        const details = await this.getServerDetails(mediaType, targetServer.id);
-        if (details.profiles.length > 0) {
-            return details.profiles;
-        }
-
-        // Fallback: If live Radarr/Sonarr profiles couldn't be loaded, use activeProfileId configured on server
-        if (targetServer.activeProfileId !== undefined) {
-            return [{
-                id: targetServer.activeProfileId,
-                name: targetServer.activeProfileName || `Default Profile (${targetServer.activeProfileId})`
-            }];
-        }
-
-        return [];
-    }
-
-    public async getRootFolders(mediaType: MediaType = 'movie', serverId?: number): Promise<SeerRootFolder[]> {
-        const servers = await this.getServers(mediaType);
-        if (servers.length === 0) return [];
-
-        const targetServer = serverId !== undefined
-            ? servers.find(s => s.id === serverId)
-            : (servers.find(s => s.isDefault) || servers[0]);
-
-        if (!targetServer) return [];
-
-        const details = await this.getServerDetails(mediaType, targetServer.id);
-        if (details.rootFolders.length > 0) {
-            return details.rootFolders;
-        }
-
-        // Fallback: If live root folders couldn't be queried, use activeDirectory configured on server
-        if (targetServer.activeDirectory) {
-            return [{
-                id: 1,
-                name: targetServer.activeDirectory,
-                path: targetServer.activeDirectory
-            }];
-        }
-
-        return [];
-    }
-
     public async getRequests(filterStatus?: RequestStatus): Promise<SeerRequest[]> {
         try {
             const filterQuery = filterStatus ? `&filter=${filterStatus}` : '';
@@ -574,7 +558,6 @@ class SeerApiService {
         }
         return [];
     }
-
 
     public async createRequest(payload: CreateRequestPayload): Promise<SeerRequest> {
         const res = await this.request('/api/v1/request', {
@@ -664,7 +647,6 @@ class SeerApiService {
                     status: ep.status
                 })) : undefined
             }));
-
         }
 
         const rawPoster = item.posterPath || item.poster_path;
@@ -690,7 +672,6 @@ class SeerApiService {
             seasons
         };
     }
-
 }
 
 export const seerApi = new SeerApiService();

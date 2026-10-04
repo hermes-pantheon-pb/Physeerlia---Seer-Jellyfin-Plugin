@@ -4,7 +4,9 @@
  * Jellyfin CSS variables (--jf-palette-*) and component utility classes.
  */
 
-.seerHeaderMuiBtn {
+.seerHeaderMuiBtn,
+.headerButton.headerSeerButton,
+[data-seer-btn="true"] {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -13,58 +15,134 @@
     background-color: transparent !important;
     outline: 0 !important;
     border: 0 !important;
-    margin: 0 !important;
+    margin: 0 0.29em !important;
     border-radius: 50% !important;
-    padding: 8px !important;
     cursor: pointer !important;
     user-select: none !important;
-    vertical-align: middle !important;
     text-decoration: none !important;
+    overflow: hidden !important;
     color: var(--seer-inferred-color, var(--jf-palette-text-secondary, rgba(255, 255, 255, 0.7))) !important;
-    opacity: 0.85 !important;
+    opacity: 0.9 !important;
     transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 150ms ease !important;
 
+    .seerHeaderLogoSvg,
     svg {
         display: block !important;
-        width: 24px !important;
-        height: 24px !important;
-        font-size: 24px !important;
-        fill: currentColor !important;
+        flex-shrink: 0 !important;
+        margin: auto !important;
         pointer-events: none !important;
+        transform-origin: center center !important;
+        transition: transform 150ms ease, filter 150ms ease !important;
     }
 
     &:hover {
         background-color: var(--jf-palette-action-hover, rgba(255, 255, 255, 0.08)) !important;
         color: var(--jf-palette-text-primary, #ffffff) !important;
         opacity: 1 !important;
+
+        .seerHeaderLogoSvg,
+        svg {
+            filter: brightness(1.15) saturate(1.2) !important;
+            transform: scale(1.08) !important;
+        }
     }
 
     &.active {
         color: var(--jf-palette-primary-main, #00a4dc) !important;
         opacity: 1 !important;
+
+        .seerHeaderLogoSvg,
+        svg {
+            filter: brightness(1.2) saturate(1.3) drop-shadow(0 0 6px rgba(79, 101, 245, 0.6)) !important;
+        }
     }
 }
 
-[data-seer-btn="true"] {
+/* Legacy layout: exact match with stock Jellyfin .headerButton.headerButtonRight */
+.headerButton.headerSeerButton {
+    padding: 0.556em !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: initial !important;
+    min-height: initial !important;
+    max-width: initial !important;
+    max-height: initial !important;
+    aspect-ratio: 1 / 1 !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    margin: 0 0.29em !important;
+
+    .seerHeaderLogoSvg,
     svg {
-        display: block !important;
+        width: 1.669565em !important;
+        height: 1.669565em !important;
+    }
+}
+
+/* Modern layout: exact match with Material-UI MuiIconButton-sizeLarge */
+.seerHeaderMuiBtn {
+    padding: 12px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 4px !important;
+
+    .seerHeaderLogoSvg,
+    svg {
         width: 24px !important;
         height: 24px !important;
-        fill: currentColor !important;
-        pointer-events: none !important;
-    }
-
-    &.active {
-        color: var(--jf-palette-primary-main, #00a4dc) !important;
     }
 }
 
-.headerSeerButton {
-    color: var(--seer-inferred-color, inherit) !important;
-    vertical-align: middle !important;
+/* Navigation Drawer items (Legacy & Modern MUI in portrait / mobile / sidebar) */
+[data-seer-drawer="true"] {
+    width: 100%;
 
-    &.active {
-        color: var(--jf-palette-primary-main, #00a4dc) !important;
+    .MuiListItemButton-root,
+    &.MuiListItemButton-root {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .MuiListItemIcon-root,
+    .navMenuOptionIcon {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .seerHeaderLogoSvg,
+    svg {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        max-width: 24px !important;
+        min-height: 24px !important;
+        max-height: 24px !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+    }
+
+    .MuiListItemText-root,
+    .navMenuOptionText {
+        margin: 0 !important;
+        flex: 1 1 auto !important;
+        white-space: nowrap !important;
     }
 }
 
@@ -127,6 +205,7 @@
 
 #seerPluginRoot {
     position: fixed;
+    top: 4.2em;
     left: 0;
     right: 0;
     bottom: 0;
@@ -134,6 +213,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--jf-palette-background-default, #121212);
+    box-sizing: border-box;
 
     &.withBackdrop {
         background-color: transparent !important;
@@ -141,13 +221,14 @@
 }
 
 .seerContainer {
-    padding-top: 1em;
+    padding-top: 1.8em !important;
     padding-bottom: 4em;
     color: var(--jf-palette-text-primary, #fff);
     min-height: calc(100vh - 4.5em);
     background: transparent;
     position: relative;
     z-index: 1;
+    box-sizing: border-box;
 }
 
 .seerHeaderBar {
@@ -156,6 +237,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1em;
+    margin-top: 0.4em;
     margin-bottom: 1.5em;
     padding-bottom: 0.8em;
     border-bottom: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.12));
@@ -167,7 +249,10 @@
     gap: 0.75em;
 
     .seerIcon {
-        font-size: 2.2em;
+        width: 1.65em !important;
+        height: 1.65em !important;
+        font-size: 1.65em !important;
+        flex-shrink: 0;
         color: var(--jf-palette-primary-main, #00a4dc);
     }
 
@@ -409,12 +494,16 @@
 /* Search Bar */
 .seerSearchBox {
     position: relative;
+    width: 100%;
     max-width: 650px;
     margin: 0 auto 2.5em;
+    box-sizing: border-box !important;
 
     .seerSearchInput {
-        width: 100%;
-        padding: 0.85em 1em 0.85em 3.2em;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0.85em 2.6em 0.85em 3.2em;
         font-size: 1.1em;
         background-color: var(--jf-palette-background-paper, rgba(255, 255, 255, 0.08));
         border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.15));
@@ -587,17 +676,27 @@
         color: var(--jf-palette-text-secondary, #bbb);
     }
 
-    select, input[type="text"] {
-        padding: 0.7em 0.9em;
-        background-color: var(--jf-palette-background-default, rgba(0, 0, 0, 0.3));
+    select,
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="search"],
+    input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]) {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.75em 1em;
+        background-color: var(--jf-palette-background-default, rgba(0, 0, 0, 0.35));
         border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.15));
-        border-radius: var(--jf-card-borderRadius, 0.25em);
+        border-radius: var(--jf-card-borderRadius, 0.3em);
         color: var(--jf-palette-text-primary, #fff);
         font-size: 0.95em;
+        font-family: inherit;
         outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
         &:focus {
             border-color: var(--jf-palette-primary-main, #00a4dc);
+            box-shadow: 0 0 0 2px rgba(0, 164, 220, 0.25);
         }
     }
 
@@ -638,35 +737,6 @@
     background-color: var(--jf-palette-background-default, rgba(0, 0, 0, 0.25));
     border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.08));
     border-radius: var(--jf-card-borderRadius, 0.25em);
-
-    .seasonItem {
-        display: flex;
-        align-items: center;
-        gap: 0.75em;
-        padding: 0.4em 0.6em;
-        border-radius: var(--jf-card-borderRadius, 0.2em);
-
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.04);
-        }
-
-        input[type="checkbox"] {
-            accent-color: var(--jf-palette-primary-main, #00a4dc);
-            width: 1.1em;
-            height: 1.1em;
-        }
-
-        .seasonName {
-            font-weight: 500;
-            color: var(--jf-palette-text-primary, #fff);
-        }
-
-        .seasonEpisodes {
-            font-size: 0.82em;
-            color: var(--jf-palette-text-secondary, #888);
-            margin-left: auto;
-        }
-    }
 }
 
 .seerModalFooter {
@@ -1229,6 +1299,8 @@
     }
 
     .seerSearchInput {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
         background-color: rgba(var(--seer-glass-tint), 0.55) !important;
         backdrop-filter: blur(14px) !important;
         -webkit-backdrop-filter: blur(14px) !important;
@@ -1448,7 +1520,17 @@
             }
         }
 
-        select, input[type="text"] {
+        select,
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="search"],
+        input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]) {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 0.75em 1em !important;
+            color: #ffffff !important;
+            font-family: inherit !important;
             background-color: rgba(0, 0, 0, 0.4) !important;
             backdrop-filter: blur(10px) !important;
             -webkit-backdrop-filter: blur(10px) !important;
@@ -1457,6 +1539,7 @@
 
             &:focus {
                 border-color: rgba(var(--seer-accent), 0.6) !important;
+                box-shadow: 0 0 0 2px rgba(var(--seer-accent), 0.25) !important;
             }
         }
 

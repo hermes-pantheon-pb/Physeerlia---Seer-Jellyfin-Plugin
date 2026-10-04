@@ -11,7 +11,6 @@ const BACKDROPS_STORAGE_KEY = 'seer_enable_backdrops';
 const GLASS_THEME_STORAGE_KEY = 'seer_glass_theme';
 
 export const SeerSettings: FC<SeerSettingsProps> = ({ onSignOut }) => {
-    const [serverUrl, setServerUrl] = useState(seerApi.getServerUrl());
     const [isTesting, setIsTesting] = useState(false);
     const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
     const [enableBackdrops, setEnableBackdrops] = useState<boolean>(() => {
@@ -38,16 +37,9 @@ export const SeerSettings: FC<SeerSettingsProps> = ({ onSignOut }) => {
         window.dispatchEvent(new CustomEvent('seer_glass_theme_changed', { detail: { enabled } }));
     };
 
-    const handleSaveConnection = (e: React.FormEvent) => {
-        e.preventDefault();
-        seerApi.setServerUrl(serverUrl);
-        setTestResult({ success: true, message: 'Server endpoint configuration saved.' });
-    };
-
     const handleTestConnection = async () => {
         setIsTesting(true);
         setTestResult(null);
-        seerApi.setServerUrl(serverUrl);
         const res = await seerApi.testConnection();
         setTestResult(res);
         setIsTesting(false);
@@ -101,17 +93,30 @@ export const SeerSettings: FC<SeerSettingsProps> = ({ onSignOut }) => {
                     </button>
                 </div>
 
-                {/* Server Endpoint Form */}
-                <form onSubmit={handleSaveConnection} style={{ display: 'flex', flexDirection: 'column', gap: '1em', borderTop: '1px solid var(--jf-palette-divider, rgba(255,255,255,0.08))', paddingTop: '1.2em' }}>
-                    <div className='seerFormGroup'>
-                        <label>Seer Server Endpoint URL</label>
-                        <input
-                            type='text'
-                            value={serverUrl}
-                            onChange={(e) => setServerUrl(e.target.value)}
-                            placeholder='http://localhost:5055'
-                        />
-                        <span className='helperText'>Base URL of your Seer instance. All user requests communicate via user session cookies.</span>
+                {/* Server Connection Status & Test */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9em', borderTop: '1px solid var(--jf-palette-divider, rgba(255,255,255,0.08))', paddingTop: '1.2em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1em' }}>
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.95em', color: 'var(--jf-palette-text-primary, #fff)', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4caf50', display: 'inline-block' }}></span>
+                                Jellyfin Server Proxy Integration
+                            </div>
+                            <div style={{ fontSize: '0.82em', color: 'var(--jf-palette-text-secondary, #aaa)', marginTop: '0.25em' }}>
+                                All requests are securely proxied and delegated through your Jellyfin server.
+                            </div>
+                        </div>
+
+                        <button
+                            type='button'
+                            className='seerActionBtn'
+                            onClick={handleTestConnection}
+                            disabled={isTesting}
+                        >
+                            <span className='material-icons' style={{ fontSize: '1.1em' }}>
+                                {isTesting ? 'rotate_right' : 'network_check'}
+                            </span>
+                            {isTesting ? 'Testing...' : 'Test Connection'}
+                        </button>
                     </div>
 
                     {testResult && (
@@ -132,27 +137,7 @@ export const SeerSettings: FC<SeerSettingsProps> = ({ onSignOut }) => {
                             <span>{testResult.message}</span>
                         </div>
                     )}
-
-                    <div style={{ display: 'flex', gap: '0.8em', marginTop: '0.2em' }}>
-                        <button
-                            type='submit'
-                            className='seerFilterBtn active'
-                        >
-                            Save Endpoint
-                        </button>
-                        <button
-                            type='button'
-                            className='seerActionBtn'
-                            onClick={handleTestConnection}
-                            disabled={isTesting}
-                        >
-                            <span className='material-icons' style={{ fontSize: '1.1em' }}>
-                                {isTesting ? 'rotate_right' : 'network_check'}
-                            </span>
-                            {isTesting ? 'Testing...' : 'Test Connection'}
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
 
             {/* Display & Backdrops Preference */}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Jellyfin.Plugin.Seer.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -49,5 +50,22 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 MenuIcon = "travel_explore"
             }
         };
+    }
+
+    /// <inheritdoc />
+    public override void OnUninstalling()
+    {
+        base.OnUninstalling();
+        try
+        {
+            if (File.Exists(ConfigurationFilePath))
+            {
+                File.Delete(ConfigurationFilePath);
+            }
+        }
+        catch
+        {
+            // Ignore any failure on uninstallation cleanup
+        }
     }
 }
