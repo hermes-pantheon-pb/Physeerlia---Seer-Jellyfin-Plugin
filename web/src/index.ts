@@ -94,6 +94,7 @@ import './styles/seer.scss';
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
             seerContainer.className = 'page type-interior seerPageRoot';
+            seerContainer.tabIndex = -1;
             seerContainer.style.position = 'fixed';
             seerContainer.style.left = '0';
             seerContainer.style.right = '0';
@@ -102,12 +103,23 @@ import './styles/seer.scss';
             seerContainer.style.overflowY = 'auto';
             seerContainer.style.overflowX = 'hidden';
             document.body.appendChild(seerContainer);
+        } else {
+            seerContainer.classList.remove('seerModalOpen');
+            seerContainer.style.removeProperty('overflow-y');
         }
 
         updateSeerPosition();
         window.addEventListener('resize', updateSeerPosition);
+        window.addEventListener('wheel', handleHeaderWheel, { passive: true });
         seerContainer.style.display = 'block';
         isSeerOpen = true;
+
+        // Focus seerContainer for keyboard scroll support
+        try {
+            seerContainer.focus({ preventScroll: true });
+        } catch {
+            // ignore
+        }
 
         // Update button active state & styling
         const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
@@ -123,10 +135,19 @@ import './styles/seer.scss';
         console.debug('[SeerPlugin] Seer view mounted underneath top bar');
     }
 
+    function handleHeaderWheel(e: WheelEvent) {
+        if (!isSeerOpen || !seerContainer) return;
+        const target = e.target as HTMLElement;
+        if (target && (target.closest('header') || target.closest('.skinHeader'))) {
+            seerContainer.scrollTop += e.deltaY;
+        }
+    }
+
     function closeSeer(revertHistory = true) {
         document.body.classList.remove('seer-active');
         document.documentElement.classList.remove('seer-active');
         window.removeEventListener('resize', updateSeerPosition);
+        window.removeEventListener('wheel', handleHeaderWheel);
 
         // Restore modern MUI topbar center stack and user views
         const navStack = document.querySelector('header .MuiToolbar-root > .MuiStack-root') as HTMLElement;
@@ -145,6 +166,8 @@ import './styles/seer.scss';
         }
 
         if (seerContainer) {
+            seerContainer.classList.remove('seerModalOpen');
+            seerContainer.style.removeProperty('overflow-y');
             seerContainer.style.display = 'none';
             ReactDOM.unmountComponentAtNode(seerContainer);
         }

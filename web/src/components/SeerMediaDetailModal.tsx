@@ -15,17 +15,6 @@ export const SeerMediaDetailModal: FC<SeerMediaDetailModalProps> = ({ item, onCl
     const [detailItem, setDetailItem] = useState<SeerMediaItem>(item);
     const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
 
-    // Prevent background content from scrolling while modal is open
-    useEffect(() => {
-        const root = document.getElementById('seerPluginRoot');
-        if (root) {
-            const prevOverflow = root.style.overflowY;
-            root.style.overflowY = 'hidden';
-            return () => {
-                root.style.overflowY = prevOverflow || 'auto';
-            };
-        }
-    }, []);
 
     useEffect(() => {
         let isCancelled = false;

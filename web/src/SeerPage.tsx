@@ -250,6 +250,30 @@ export const SeerPage: FC<SeerPageProps> = ({ onClose }) => {
         };
     }, []);
 
+    // Centralized Modal Open State for robust background scroll locking without race conditions
+    const isModalOpen = Boolean(selectedMediaForDetail || selectedMediaForRequest);
+
+    useEffect(() => {
+        const root = document.getElementById('seerPluginRoot');
+        if (!root) return;
+        if (isModalOpen) {
+            root.classList.add('seerModalOpen');
+        } else {
+            root.classList.remove('seerModalOpen');
+            root.style.removeProperty('overflow-y');
+        }
+    }, [isModalOpen]);
+
+    useEffect(() => {
+        return () => {
+            const root = document.getElementById('seerPluginRoot');
+            if (root) {
+                root.classList.remove('seerModalOpen');
+                root.style.removeProperty('overflow-y');
+            }
+        };
+    }, []);
+
     const handleBackdropsLoaded = useCallback((urls: string[]) => {
         trendingBackdropsRef.current = urls;
         if (backdropsEnabled && urls.length > 0) {
