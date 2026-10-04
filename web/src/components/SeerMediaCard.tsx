@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect, useRef } from 'react';
 import { SeerMediaItem, MediaStatus } from '../types';
 
 interface SeerMediaCardProps {
@@ -30,6 +30,22 @@ const getStatusBadge = (item: SeerMediaItem) => {
 
 export const SeerMediaCard: FC<SeerMediaCardProps> = ({ item, onClick }) => {
     const year = item.releaseDate ? new Date(item.releaseDate).getFullYear() : null;
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [lowResLoaded, setLowResLoaded] = useState(false);
+    const imgRef = useRef<HTMLImageElement | null>(null);
+
+    // Compute tiny thumbnail URL for progressive loading (TMDB w92 is ~1-2KB)
+    const lowResUrl = item.posterPath && item.posterPath.includes('image.tmdb.org')
+        ? item.posterPath.replace(/\/w(?:300|500)\//, '/w92/')
+        : undefined;
+
+    useEffect(() => {
+        setIsLoaded(false);
+        setLowResLoaded(false);
+        if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+            setIsLoaded(true);
+        }
+    }, [item.posterPath]);
 
     return (
         <div
@@ -52,12 +68,25 @@ export const SeerMediaCard: FC<SeerMediaCardProps> = ({ item, onClick }) => {
                 <div className='cardScalable'>
                     <div className='cardImageContainer'>
                         {item.posterPath ? (
-                            <img
-                                className='cardImage'
-                                src={item.posterPath}
-                                alt={item.title}
-                                loading='lazy'
-                            />
+                            <>
+                                {lowResUrl && !isLoaded && (
+                                    <img
+                                        className={`cardImageLowRes ${lowResLoaded ? 'loaded' : ''}`}
+                                        src={lowResUrl}
+                                        alt=""
+                                        aria-hidden="true"
+                                        onLoad={() => setLowResLoaded(true)}
+                                    />
+                                )}
+                                <img
+                                    ref={imgRef}
+                                    className={`cardImage ${isLoaded ? 'loaded' : ''}`}
+                                    src={item.posterPath}
+                                    alt={item.title}
+                                    loading='lazy'
+                                    onLoad={() => setIsLoaded(true)}
+                                />
+                            </>
                         ) : (
                             <div className='cardImagePlaceholder'>
                                 <span className='material-icons' style={{ fontSize: '3em' }}>movie</span>

@@ -108,9 +108,6 @@ class SeerBackdropManager {
         const seerRoot = document.getElementById('seerPluginRoot');
         if (seerRoot) seerRoot.classList.add('withBackdrop');
 
-        const jfBackground = document.querySelector('.backgroundContainer');
-        if (jfBackground) jfBackground.classList.add('withBackdrop');
-
         const img = new Image();
         img.onload = () => {
             if (!this.container || !document.body.contains(this.container)) return;
@@ -161,9 +158,6 @@ class SeerBackdropManager {
         this.previousRotationUrl = null;
         const seerRoot = document.getElementById('seerPluginRoot');
         if (seerRoot) seerRoot.classList.remove('withBackdrop');
-
-        const jfBackground = document.querySelector('.backgroundContainer');
-        if (jfBackground) jfBackground.classList.remove('withBackdrop');
     }
 
     private clearRotation() {

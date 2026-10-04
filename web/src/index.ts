@@ -61,13 +61,16 @@ import './styles/seer.scss';
     function updateSeerPosition() {
         if (!seerContainer) return;
         const topOffset = getHeaderOffset();
-        seerContainer.style.top = `${topOffset}px`;
-        seerContainer.style.height = `calc(100vh - ${topOffset}px)`;
+        seerContainer.style.top = '0px';
+        seerContainer.style.height = '100vh';
+        seerContainer.style.paddingTop = `${topOffset}px`;
     }
 
     function openSeer() {
         document.body.classList.add('seer-active');
         document.documentElement.classList.add('seer-active');
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
 
         // Disconnect MutationObserver to eliminate ALL DOM mutation thrashing while using Seer
         if (observer) {
@@ -96,12 +99,16 @@ import './styles/seer.scss';
             seerContainer.className = 'page type-interior seerPageRoot';
             seerContainer.tabIndex = -1;
             seerContainer.style.position = 'fixed';
+            seerContainer.style.top = '0';
             seerContainer.style.left = '0';
             seerContainer.style.right = '0';
             seerContainer.style.bottom = '0';
+            seerContainer.style.width = '100%';
+            seerContainer.style.height = '100vh';
             seerContainer.style.zIndex = '1050';
             seerContainer.style.overflowY = 'auto';
             seerContainer.style.overflowX = 'hidden';
+            seerContainer.style.boxSizing = 'border-box';
             document.body.appendChild(seerContainer);
         } else {
             seerContainer.classList.remove('seerModalOpen');
@@ -146,6 +153,8 @@ import './styles/seer.scss';
     function closeSeer(revertHistory = true) {
         document.body.classList.remove('seer-active');
         document.documentElement.classList.remove('seer-active');
+        document.documentElement.style.removeProperty('overflow');
+        document.body.style.removeProperty('overflow');
         window.removeEventListener('resize', updateSeerPosition);
         window.removeEventListener('wheel', handleHeaderWheel);
 
@@ -182,10 +191,6 @@ import './styles/seer.scss';
         const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
         const searchBtn = document.querySelector('header a[href*="/search"], header button[aria-label*="Search" i]') as HTMLElement;
         if (btn) syncButtonTheme(btn, searchBtn);
-
-        // Remove withBackdrop from native background container if present
-        const jfBackground = document.querySelector('.backgroundContainer');
-        if (jfBackground) jfBackground.classList.remove('withBackdrop');
 
         if (revertHistory && window.location.hash === '#seer') {
             window.history.back();
