@@ -89,6 +89,9 @@ import './styles/seer.scss';
         }
 
         updateSeerPosition();
+        requestAnimationFrame(updateSeerPosition);
+        setTimeout(updateSeerPosition, 50);
+        setTimeout(updateSeerPosition, 150);
         window.addEventListener('resize', updateSeerPosition);
         seerContainer.style.display = 'block';
         isSeerOpen = true;

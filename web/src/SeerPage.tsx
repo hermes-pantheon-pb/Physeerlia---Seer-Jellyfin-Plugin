@@ -30,6 +30,7 @@ class SeerBackdropManager {
     private intervalId: any = null;
     private currentActiveImg: HTMLElement | null = null;
     private previousRotationUrl: string | null = null;
+    private currentActiveUrl: string | null = null;
 
     private getContainer(): HTMLElement {
         if (!this.container || !document.body.contains(this.container)) {
@@ -103,6 +104,11 @@ class SeerBackdropManager {
 
     private transitionTo(url: string) {
         if (!url) return;
+        if (this.currentActiveUrl === url && this.currentActiveImg && this.currentActiveImg.parentElement) {
+            return;
+        }
+        this.currentActiveUrl = url;
+
         const container = this.getContainer();
         const seerRoot = document.getElementById('seerPluginRoot');
         if (seerRoot) seerRoot.classList.add('withBackdrop');
@@ -161,6 +167,7 @@ class SeerBackdropManager {
         }
         this.currentActiveImg = null;
         this.previousRotationUrl = null;
+        this.currentActiveUrl = null;
         const seerRoot = document.getElementById('seerPluginRoot');
         if (seerRoot) seerRoot.classList.remove('withBackdrop');
 

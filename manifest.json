@@ -8,6 +8,14 @@
     "overview": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into the Jellyfin web client with automatic zero-login SSO delegation and granular per-user permissions.",
     "versions": [
       {
+        "version": "1.0.2.0",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/releases/download/v1.0.2.0/jellyfin-plugin-seer.zip",
+        "checksum": "c0c7fd9b255dc394f060e558c2b9dea2",
+        "changelog": "Fix mobile modal flashing and GPU compositor tile glitches, eliminate nested backdrop blur artifacts, and ensure clean topbar styling without previous page bleed-through.",
+        "timestamp": "2026-10-04T17:20:00Z"
+      },
+      {
         "version": "1.0.1.0",
         "targetAbi": "10.9.0.0",
         "sourceUrl": "https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/releases/download/v1.0.1.0/jellyfin-plugin-seer.zip",
