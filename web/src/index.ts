@@ -548,7 +548,6 @@ import './styles/seer.scss';
 
     const observer = new MutationObserver(() => {
         if (isSeerOpen) {
-            syncHeaderState();
             return;
         }
         scheduleInjectNavigation();

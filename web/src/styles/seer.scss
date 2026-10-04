@@ -360,6 +360,7 @@ body.seer-active .skinHeader::after {
     z-index: 1050 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    scrollbar-gutter: stable;
     background-color: var(--jf-palette-background-default, #121212);
     box-sizing: border-box !important;
     scrollbar-width: thin;
@@ -367,7 +368,7 @@ body.seer-active .skinHeader::after {
     outline: none;
 
     &.seerModalOpen {
-        overflow-y: hidden !important;
+        overflow-y: auto !important;
     }
 
     &.withBackdrop {
@@ -543,10 +544,11 @@ body.seer-active .skinHeader::after {
 
 .seerMediaCard {
     cursor: pointer;
-    transition: box-shadow 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
     user-select: none;
     -webkit-tap-highlight-color: transparent !important;
     outline: none !important;
+    will-change: transform;
 
     @media (hover: hover) and (pointer: fine) {
         &:hover {
@@ -595,8 +597,6 @@ body.seer-active .skinHeader::after {
         object-fit: cover;
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
-        filter: blur(8px);
-        transform: scale(1.08);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.25s ease-out;
@@ -779,7 +779,15 @@ body.seer-active .skinHeader::after {
     box-sizing: border-box !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
     animation: modalFadeIn 0.15s ease-out;
+
+    @media (max-width: 768px) {
+        padding-top: calc(3.5em + env(safe-area-inset-top, 0px)) !important;
+        padding-left: 0.5em !important;
+        padding-right: 0.5em !important;
+        background-color: rgba(0, 0, 0, 0.9) !important;
+    }
 }
 
 .seerModalStage {
@@ -791,12 +799,10 @@ body.seer-active .skinHeader::after {
 
 @keyframes modalContentSwap {
     0% {
-        opacity: 0.85;
-        transform: translateY(4px);
+        opacity: 0.88;
     }
     100% {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -812,7 +818,15 @@ body.seer-active .skinHeader::after {
     flex-direction: column;
     overflow: hidden;
     margin-top: 0;
-    animation: modalContentSwap 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity;
+    animation: modalContentSwap 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+
+    @media (max-width: 768px) {
+        max-height: calc(100vh - 4.5em - env(safe-area-inset-top, 0px)) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+        background-color: #191920 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
 
     form {
         display: flex;
@@ -1680,7 +1694,7 @@ body.seer-active .skinHeader::after {
     /* Frosted Modals & Dialogs: Translucent glass dialog card */
     &.seerModalBackdrop,
     .seerModalBackdrop {
-        background-color: rgba(0, 0, 0, 0.8) !important;
+        background-color: rgba(0, 0, 0, 0.82) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         align-items: flex-start !important;
@@ -1688,20 +1702,32 @@ body.seer-active .skinHeader::after {
         padding-bottom: 2em !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
     }
 
     .seerModalContent,
     &.seerModalContent {
-        background-color: rgba(var(--seer-glass-tint), 0.78) !important;
-        background: rgba(var(--seer-glass-tint), 0.78) !important;
-        backdrop-filter: blur(18px) !important;
-        -webkit-backdrop-filter: blur(18px) !important;
+        background-color: rgba(var(--seer-glass-tint), 0.82) !important;
+        background: rgba(var(--seer-glass-tint), 0.82) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
         border: 1px solid rgba(255, 255, 255, 0.18) !important;
         border-radius: calc(var(--seer-radius) + 2px) !important;
         box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
         max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px)) !important;
         overflow: hidden !important;
         margin-top: 0 !important;
+        will-change: opacity;
+
+        @media (max-width: 768px) {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background-color: #191920 !important;
+            background: #191920 !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            max-height: calc(100vh - 4.5em - env(safe-area-inset-top, 0px)) !important;
+        }
 
         form {
             display: flex !important;
