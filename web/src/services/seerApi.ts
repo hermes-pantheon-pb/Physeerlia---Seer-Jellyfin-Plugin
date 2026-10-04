@@ -22,6 +22,8 @@ const STORAGE_KEYS = {
 class SeerApiService {
     private currentUser: SeerUser | null = null;
     private mediaCache: Map<string, SeerMediaItem> = new Map();
+    private serversCache: Map<string, { data: SeerServer[]; expiresAt: number }> = new Map();
+    private serverDetailsCache: Map<string, { data: SeerServerDetails; expiresAt: number }> = new Map();
 
     constructor() {
         // Restore cached user session if present
@@ -422,13 +424,18 @@ class SeerApiService {
     }
 
     public async getServers(mediaType: MediaType): Promise<SeerServer[]> {
+        const cached = this.serversCache.get(mediaType);
+        if (cached && cached.expiresAt > Date.now()) {
+            return cached.data;
+        }
+
         const endpoint = mediaType === 'movie' ? '/api/v1/service/radarr' : '/api/v1/service/sonarr';
         try {
             const res = await this.request(endpoint);
             if (res.ok) {
                 const servers = await res.json();
                 if (Array.isArray(servers)) {
-                    return servers.map((s: any) => ({
+                    const mapped: SeerServer[] = servers.map((s: any) => ({
                         id: s.id,
                         name: s.name,
                         is4k: Boolean(s.is4k),
@@ -437,18 +444,26 @@ class SeerApiService {
                         activeProfileName: s.activeProfileName,
                         activeDirectory: s.activeDirectory
                     }));
+                    this.serversCache.set(mediaType, { data: mapped, expiresAt: Date.now() + 300000 });
+                    return mapped;
                 }
             }
         } catch (e) {
             console.error(`Failed to fetch ${mediaType} servers from Seer`, e);
         }
-        return [];
+        return cached?.data || [];
     }
 
     /**
      * Fetches detailed quality profiles and root storage folders for a specific Radarr or Sonarr server
      */
     public async getServerDetails(mediaType: MediaType, serverId: number): Promise<SeerServerDetails> {
+        const cacheKey = `${mediaType}:${serverId}`;
+        const cached = this.serverDetailsCache.get(cacheKey);
+        if (cached && cached.expiresAt > Date.now()) {
+            return cached.data;
+        }
+
         const endpoint = mediaType === 'movie'
             ? `/api/v1/service/radarr/${serverId}`
             : `/api/v1/service/sonarr/${serverId}`;
@@ -486,13 +501,15 @@ class SeerApiService {
                     activeDirectory: data.server.activeDirectory
                 } : undefined;
 
-                return { server, profiles, rootFolders };
+                const result: SeerServerDetails = { server, profiles, rootFolders };
+                this.serverDetailsCache.set(cacheKey, { data: result, expiresAt: Date.now() + 300000 });
+                return result;
             }
         } catch (e) {
             console.warn(`Failed to fetch server details for ${mediaType} #${serverId}`, e);
         }
 
-        return { profiles: [], rootFolders: [] };
+        return cached?.data || { profiles: [], rootFolders: [] };
     }
 
     public async getRequests(filterStatus?: RequestStatus): Promise<SeerRequest[]> {

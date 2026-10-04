@@ -399,7 +399,7 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                                     </button>
                                 </div>
 
-                                {isLoadingSeasons && (
+                                {isLoadingSeasons && seasonMode === 'custom' && (
                                     <div style={{ padding: '1.2em', textAlign: 'center', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px dashed var(--jf-palette-divider, rgba(255,255,255,0.1))' }}>
                                         <span className='material-icons' style={{ animation: 'spin 1s linear infinite', fontSize: '1.6em', color: 'var(--jf-palette-primary-main, #00a4dc)' }}>rotate_right</span>
                                         <div style={{ marginTop: '0.4em', fontSize: '0.85em', color: 'var(--jf-palette-text-secondary, #aaa)' }}>
@@ -558,11 +558,15 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                                             onChange={(e) => setSelectedServerId(Number(e.target.value))}
                                             disabled={isLoadingOptions || allServers.length === 0}
                                         >
-                                            {allServers.map(s => (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.name} {s.is4k ? '(4K)' : ''} {s.isDefault ? '(Default)' : ''}
-                                                </option>
-                                            ))}
+                                            {allServers.length === 0 ? (
+                                                <option value=''>Loading servers...</option>
+                                            ) : (
+                                                allServers.map(s => (
+                                                    <option key={s.id} value={s.id}>
+                                                        {s.name} {s.is4k ? '(4K)' : ''} {s.isDefault ? '(Default)' : ''}
+                                                    </option>
+                                                ))
+                                            )}
                                         </select>
                                     </div>
 
@@ -581,7 +585,9 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                                             onChange={(e) => setSelectedRootFolder(e.target.value)}
                                             disabled={isLoadingOptions || rootFolders.length === 0}
                                         >
-                                            {rootFolders.length === 0 ? (
+                                            {isLoadingOptions && rootFolders.length === 0 ? (
+                                                <option value=''>Loading storage options...</option>
+                                            ) : rootFolders.length === 0 ? (
                                                 <option value=''>No root folders available</option>
                                             ) : (
                                                 rootFolders.map(rf => (
@@ -609,7 +615,9 @@ export const SeerRequestModal: FC<SeerRequestModalProps> = ({ item, onClose, onR
                                             onChange={(e) => setSelectedProfileId(Number(e.target.value))}
                                             disabled={isLoadingOptions || profiles.length === 0}
                                         >
-                                            {profiles.length === 0 ? (
+                                            {isLoadingOptions && profiles.length === 0 ? (
+                                                <option value=''>Loading profiles...</option>
+                                            ) : profiles.length === 0 ? (
                                                 <option value=''>No quality profiles available</option>
                                             ) : (
                                                 profiles.map(p => (

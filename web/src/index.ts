@@ -66,6 +66,9 @@ import './styles/seer.scss';
     }
 
     function openSeer() {
+        document.body.classList.add('seer-active');
+        document.documentElement.classList.add('seer-active');
+
         if (!seerContainer) {
             seerContainer = document.createElement('div');
             seerContainer.id = 'seerPluginRoot';
@@ -100,6 +103,8 @@ import './styles/seer.scss';
     }
 
     function closeSeer(revertHistory = true) {
+        document.body.classList.remove('seer-active');
+        document.documentElement.classList.remove('seer-active');
         window.removeEventListener('resize', updateSeerPosition);
         if (seerContainer) {
             seerContainer.style.display = 'none';

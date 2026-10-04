@@ -168,7 +168,6 @@
         opacity: 1;
         filter: blur(var(--seer-backdrop-blur, 18px)) brightness(0.42) saturate(1.25);
         transform: scale(1.08);
-        will-change: opacity, transform;
         animation: seerBackdropFadeIn 1000ms cubic-bezier(0.4, 0, 0.2, 1) both;
 
         &.fadeOut {
@@ -200,6 +199,52 @@
     }
     100% {
         opacity: 0;
+    }
+}
+
+/* Active Seer state: Top bar solid styling and hiding previous page library tabs & Abyss background */
+html.seer-active body,
+body.seer-active {
+    /* Hide previous page header tabs, section tabs, titles, and logos */
+    .headerTabs,
+    .sectionTabs,
+    .emby-tabs,
+    .headerTabsContainer,
+    .headerHomeButton,
+    .headerLeft .pageTitle,
+    .pageTitleWithDefaultLogo,
+    .pageTitleWithLogo {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Force the top bar header to be solid dark #101014 so Abyss animated poster wall does not bleed through */
+    .skinHeader,
+    header.skinHeader,
+    header.MuiAppBar-root,
+    .skinHeader-withBackground,
+    .skinHeader.semiTransparent {
+        background-color: #101014 !important;
+        background: #101014 !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Hide native background container and any Abyss poster wall slideshow while Seer is active */
+    #poster-wall,
+    .poster-wall,
+    #posterWall,
+    .posterWall,
+    .abyssPosterWall,
+    .abyss-posters,
+    .abyss-background,
+    .backgroundContainer {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        animation-play-state: paused !important;
     }
 }
 
@@ -356,8 +401,6 @@
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
-    content-visibility: auto;
-    contain-intrinsic-size: 200px 320px;
 
     &:hover {
         transform: translateY(-4px) scale(1.02);
@@ -566,13 +609,13 @@
 }
 
 .seerModalContent {
-    background-color: var(--jf-palette-background-paper, #1e1e1e);
+    background-color: #18181c !important;
     border: 1px solid var(--jf-palette-divider, rgba(255, 255, 255, 0.12));
     border-radius: var(--jf-card-borderRadius, 0.4em);
     width: 100%;
     max-width: 640px;
     max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px));
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1426,8 +1469,6 @@
 
     .seerSeasonPreviewCard {
         background-color: rgba(var(--seer-glass-tint), 0.52) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
         border-radius: var(--seer-radius) !important;
         transition: all 0.2s var(--seer-ease) !important;
@@ -1438,10 +1479,10 @@
         }
     }
 
-    /* Frosted Modals & Dialogs */
+    /* Frosted Modals & Dialogs: Opaque dialog card with blurred backdrop overlay to maximize mobile performance */
     &.seerModalBackdrop,
     .seerModalBackdrop {
-        background-color: rgba(0, 0, 0, 0.5) !important;
+        background-color: rgba(0, 0, 0, 0.7) !important;
         backdrop-filter: blur(8px) !important;
         -webkit-backdrop-filter: blur(8px) !important;
         align-items: flex-start !important;
@@ -1452,12 +1493,12 @@
 
     .seerModalContent,
     &.seerModalContent {
-        background-color: rgba(var(--seer-glass-tint), 0.72) !important;
-        backdrop-filter: blur(var(--seer-glass-backdrop-blur)) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(var(--seer-glass-backdrop-blur)) saturate(180%) !important;
+        background-color: #18181c !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         border: 1px solid rgba(255, 255, 255, 0.16) !important;
         border-radius: calc(var(--seer-radius) + 2px) !important;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
         max-height: calc(100vh - 6.2em - env(safe-area-inset-top, 0px)) !important;
         overflow: hidden !important;
         margin-top: 0 !important;
@@ -1506,16 +1547,16 @@
         }
 
         .cancelBtn {
-            background: rgba(var(--seer-glass-tint), 0.5) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             border: 1px solid rgba(255, 255, 255, 0.18) !important;
             border-radius: var(--seer-radius) !important;
             color: #ffffff !important;
             transition: all 0.25s var(--seer-ease) !important;
 
             &:hover {
-                background: rgba(255, 255, 255, 0.2) !important;
+                background: rgba(255, 255, 255, 0.18) !important;
                 border-color: rgba(255, 255, 255, 0.35) !important;
             }
         }
@@ -1531,9 +1572,9 @@
             padding: 0.75em 1em !important;
             color: #ffffff !important;
             font-family: inherit !important;
-            background-color: rgba(0, 0, 0, 0.4) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             border: 1px solid rgba(255, 255, 255, 0.14) !important;
             border-radius: 8px !important;
 

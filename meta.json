@@ -6,5 +6,5 @@
   "overview": "Physeerlia brings Overseerr and Jellyseerr directly into the Jellyfin client with zero-login SSO delegation, per-user permission enforcement, and optional Abyss frosted glass styling.",
   "owner": "hermes-pantheon-pb",
   "targetAbi": "10.9.0.0",
-  "version": "1.0.4.0"
+  "version": "1.0.5.0"
 }
