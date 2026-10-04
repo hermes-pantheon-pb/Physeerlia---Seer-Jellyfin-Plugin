@@ -22,6 +22,11 @@ Browse trending media, discover new movies and TV shows, and request content dir
 ### 🤖 A Note on Development
 This project was developed with AI pair-programming assistance under strict, deliberate guidance and architectural oversight from the creator. It was not generated blindly; every architectural pattern, design principle (such as zero-residue, in-memory injection, and per-user permission delegation), styling detail, and safety measure was actively directed and tested to ensure it adhered faithfully to the project's vision.
 
+### 🧪 Theme Compatibility & Early-Stage Notice
+This plugin was primarily developed and tested in everyday use alongside the popular **Abyss theme** for Jellyfin. While testing was also conducted on Jellyfin's **default theme**, not every possible client configuration, custom CSS theme, or niche use case has been exhaustively verified.
+
+Given that this project is relatively new and was created first and foremost for personal daily use, it may take some time to uncover and patch edge cases that cause unexpected breakages. If this project gains community attention, identifying those edge cases will largely rely on user reports. If you run into any visual glitches, theme conflicts, or bugs, please share them via [GitHub Issues](https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/issues)!
+
 ---
 
 ## 🌟 Key Features
