@@ -277,6 +277,9 @@ body.seer-active {
     .skinHeader::after {
         display: none !important;
         content: none !important;
+        background: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
     /* Pause heavy background animated poster walls (e.g. Abyss theme) while Seer is active to save GPU/CPU */
@@ -295,14 +298,54 @@ body.seer-active {
 }
 
 /* Ensure override against high-specificity theme selectors like Abyss html[data-theme="dark"] */
-html[data-theme] header.MuiAppBar-root {
-    body.seer-active & {
-        background-color: #101014 !important;
-        background: #101014 !important;
-        background-image: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
+html.seer-active header,
+html.seer-active header.MuiAppBar-root,
+html.seer-active .skinHeader,
+html.seer-active[data-theme] header,
+html.seer-active[data-theme] header.MuiAppBar-root,
+html.seer-active[data-theme] .skinHeader,
+html[data-theme] body.seer-active header,
+html[data-theme] body.seer-active header.MuiAppBar-root,
+html[data-theme] body.seer-active .skinHeader,
+body.seer-active header,
+body.seer-active header.MuiAppBar-root,
+body.seer-active .skinHeader {
+    z-index: 1060 !important;
+    background-color: #101014 !important;
+    background: #101014 !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.seer-active header .MuiToolbar-root,
+html[data-theme] body.seer-active header .MuiToolbar-root,
+body.seer-active header .MuiToolbar-root {
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.seer-active header::before,
+html.seer-active header::after,
+html.seer-active .skinHeader::before,
+html.seer-active .skinHeader::after,
+html[data-theme] body.seer-active header::before,
+html[data-theme] body.seer-active header::after,
+html[data-theme] body.seer-active .skinHeader::before,
+html[data-theme] body.seer-active .skinHeader::after,
+body.seer-active header::before,
+body.seer-active header::after,
+body.seer-active .skinHeader::before,
+body.seer-active .skinHeader::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 #seerPluginRoot {
@@ -354,8 +397,20 @@ html[data-theme] header.MuiAppBar-root {
     }
 }
 
+#seerPage {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    min-height: 100% !important;
+    height: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
 .seerContainer {
-    padding-top: 1.8em !important;
+    padding-top: calc(var(--seer-header-offset, 4.5em) + 1.2em + env(safe-area-inset-top, 0px)) !important;
     padding-bottom: 4em;
     color: var(--jf-palette-text-primary, #fff);
     min-height: 100vh;

@@ -45,7 +45,7 @@ import './styles/seer.scss';
     }
 
     function getHeaderOffset(): number {
-        const header = document.querySelector('header, .skinHeader:not([class*="hide"]):not([style*="display: none"])');
+        const header = document.querySelector('header.MuiAppBar-root, header:not([style*="display: none"]), .skinHeader:not([class*="hide"]):not([style*="display: none"])');
         if (header) {
             const rect = header.getBoundingClientRect();
             if (rect.bottom > 0) {
@@ -61,9 +61,30 @@ import './styles/seer.scss';
     function updateSeerPosition() {
         if (!seerContainer) return;
         const topOffset = getHeaderOffset();
+        seerContainer.style.setProperty('--seer-header-offset', `${topOffset}px`);
         seerContainer.style.top = '0px';
         seerContainer.style.height = '100vh';
-        seerContainer.style.paddingTop = `${topOffset}px`;
+        seerContainer.style.removeProperty('padding-top');
+    }
+
+    function syncHeaderState() {
+        if (!isSeerOpen) return;
+        document.querySelectorAll('header, .skinHeader, .MuiAppBar-root').forEach(el => {
+            const h = el as HTMLElement;
+            h.style.setProperty('background-color', '#101014', 'important');
+            h.style.setProperty('background', '#101014', 'important');
+            h.style.setProperty('backdrop-filter', 'none', 'important');
+            h.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+            h.style.setProperty('z-index', '1060', 'important');
+        });
+
+        const navStack = document.querySelector('header .MuiToolbar-root > .MuiStack-root') as HTMLElement;
+        if (navStack) {
+            navStack.style.setProperty('display', 'none', 'important');
+        }
+        document.querySelectorAll('header [class*="userViews"], header [class*="UserViewNav"], header [class*="ServerButton"]').forEach(el => {
+            (el as HTMLElement).style.setProperty('display', 'none', 'important');
+        });
     }
 
     function openSeer() {
@@ -72,26 +93,7 @@ import './styles/seer.scss';
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
 
-        // Disconnect MutationObserver to eliminate ALL DOM mutation thrashing while using Seer
-        if (observer) {
-            observer.disconnect();
-        }
-
-        // Immediately hide center library stack and user views in modern MUI topbar
-        const navStack = document.querySelector('header .MuiToolbar-root > .MuiStack-root') as HTMLElement;
-        if (navStack) {
-            navStack.style.setProperty('display', 'none', 'important');
-        }
-        document.querySelectorAll('header [class*="userViews"], header [class*="UserViewNav"], header [class*="ServerButton"]').forEach(el => {
-            (el as HTMLElement).style.setProperty('display', 'none', 'important');
-        });
-        const headerEl = document.querySelector('header, .skinHeader') as HTMLElement;
-        if (headerEl) {
-            headerEl.style.setProperty('background-color', '#101014', 'important');
-            headerEl.style.setProperty('background', '#101014', 'important');
-            headerEl.style.setProperty('backdrop-filter', 'none', 'important');
-            headerEl.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-        }
+        syncHeaderState();
 
         if (!seerContainer) {
             seerContainer = document.createElement('div');
@@ -166,13 +168,14 @@ import './styles/seer.scss';
         document.querySelectorAll('header [class*="userViews"], header [class*="UserViewNav"], header [class*="ServerButton"]').forEach(el => {
             (el as HTMLElement).style.removeProperty('display');
         });
-        const headerEl = document.querySelector('header, .skinHeader') as HTMLElement;
-        if (headerEl) {
-            headerEl.style.removeProperty('background-color');
-            headerEl.style.removeProperty('background');
-            headerEl.style.removeProperty('backdrop-filter');
-            headerEl.style.removeProperty('-webkit-backdrop-filter');
-        }
+        document.querySelectorAll('header, .skinHeader, .MuiAppBar-root').forEach(el => {
+            const h = el as HTMLElement;
+            h.style.removeProperty('background-color');
+            h.style.removeProperty('background');
+            h.style.removeProperty('backdrop-filter');
+            h.style.removeProperty('-webkit-backdrop-filter');
+            h.style.removeProperty('z-index');
+        });
 
         if (seerContainer) {
             seerContainer.classList.remove('seerModalOpen');
@@ -181,11 +184,6 @@ import './styles/seer.scss';
             ReactDOM.unmountComponentAtNode(seerContainer);
         }
         isSeerOpen = false;
-
-        // Reconnect MutationObserver now that Seer is closed
-        if (observer && document.body) {
-            observer.observe(document.body, { childList: true });
-        }
 
         // Reset button active state & styling
         const btn = document.querySelector('[data-seer-btn="true"]') as HTMLElement;
@@ -549,7 +547,10 @@ import './styles/seer.scss';
     }
 
     const observer = new MutationObserver(() => {
-        if (isSeerOpen) return;
+        if (isSeerOpen) {
+            syncHeaderState();
+            return;
+        }
         scheduleInjectNavigation();
     });
 
