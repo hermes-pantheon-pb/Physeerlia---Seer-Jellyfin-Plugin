@@ -1,10 +1,10 @@
 {
   "category": "General",
   "guid": "b1b87a2a-4db3-4fc9-b59a-143c7b39922e",
-  "name": "Seer Integration",
-  "description": "Native Overseerr and Jellyseerr requests and discovery integration.",
-  "overview": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into the Jellyfin web client with automatic zero-login SSO delegation and granular per-user permissions.",
-  "owner": "Antigravity",
+  "name": "Physeerlia",
+  "description": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into Jellyfin with zero-login SSO delegation.",
+  "overview": "Physeerlia brings Overseerr and Jellyseerr directly into the Jellyfin client with zero-login SSO delegation, per-user permission enforcement, and optional Abyss frosted glass styling.",
+  "owner": "peuga",
   "targetAbi": "10.9.0.0",
   "version": "1.0.0.0"
 }
