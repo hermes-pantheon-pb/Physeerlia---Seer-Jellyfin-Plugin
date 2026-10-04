@@ -9,6 +9,21 @@ Browse trending media, discover new movies and TV shows, and request content dir
 
 ---
 
+## 💡 Motivation & Philosophy
+
+> *"No media client is completely perfect. While several third-party clients attempt to build in Overseerr/Jellyseerr support natively, they often fall short in subtle ways that the official Jellyfin client does not (even if the official client isn't without its own quirks). For me, the official client has consistently provided the smoothest experience with the fewest headaches, and I wanted a first-class Seer integration right inside it.*
+>
+> *I am well aware that other plugins attempt to solve this, but I haven't come across one that simply takes the straightforward approach: adding a dedicated, cohesive Seer page directly into the web client. Instead, many try to be compatible with every possible client by repurposing Favorites or relying on other rather janky workarounds with complicated setup routines.*
+>
+> *Physeerlia was created with a clear philosophy: **look as seamlessly integrated as possible while remaining as isolated as possible.** By using in-memory injection and a clean server-side proxy rather than touching the database or filesystem, it is designed to survive server updates and coexist peacefully with other plugins and themes."*
+>
+> — **Creator Note**
+
+### 🤖 A Note on Development
+This project was developed with AI pair-programming assistance under strict, deliberate guidance and architectural oversight from the creator. It was not generated blindly; every architectural pattern, design principle (such as zero-residue, in-memory injection, and per-user permission delegation), styling detail, and safety measure was actively directed and tested to ensure it adhered faithfully to the project's vision.
+
+---
+
 ## 🌟 Key Features
 
 * **Native Client Experience**: Dedicated Seer entry in both the top toolbar and responsive hamburger drawer navigation on mobile and portrait views, automatically matching the active Jellyfin theme.
@@ -92,12 +107,21 @@ jellyfin-plugin-seer/
 ## 🚀 Installation & Setup
 
 ### Option 1: Jellyfin Plugin Repository (Recommended)
-1. Add the plugin repository URL to Jellyfin: **Dashboard → Plugins → Repositories → Add**.
-2. Install **Seer Integration** from the **Catalog**.
-3. Restart your Jellyfin server.
+
+1. Open your Jellyfin admin dashboard and go to **Dashboard → Plugins → Repositories**.
+2. Click the **+** (Add) button.
+3. Fill in the fields:
+   * **Repository Name**: `Physeerlia` (or any name you prefer)
+   * **Repository URL**:
+     ```text
+     https://raw.githubusercontent.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/main/manifest.json
+     ```
+4. Click **Save**.
+5. Switch to the **Catalog** tab in Jellyfin, locate **Physeerlia**, and click **Install**.
+6. Restart your Jellyfin server.
 
 ### Option 2: Manual Installation
-1. Download `jellyfin-plugin-seer.zip` from releases or build locally.
+1. Download `jellyfin-plugin-seer.zip` from the [GitHub Releases](https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/releases) or build it locally.
 2. Extract `Jellyfin.Plugin.Seer.dll` and `meta.json` into your Jellyfin `plugins/` directory:
    * **Linux**: `/var/lib/jellyfin/plugins/Seer/`
    * **Docker**: `<config_path>/plugins/Seer/`
