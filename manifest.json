@@ -8,6 +8,14 @@
     "overview": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into the Jellyfin web client with automatic zero-login SSO delegation and granular per-user permissions.",
     "versions": [
       {
+        "version": "1.0.8.3",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/releases/download/v1.0.8.3/jellyfin-plugin-seer.zip",
+        "checksum": "fc7dc9fd508a646e6a144876aac22f6c",
+        "changelog": "Fix topbar transparency/ghosting across themes and ensure header bar is never overlapped with positive top clearance; eliminate mobile rapid scrolling lag and gray artifacting by removing content-visibility: auto (which caused unpainted tile gaps), eliminating React setState churn on poster reveals via zero-state CSS opacity transitions, disabling backdrop-filter blur on mobile badges/controls, and keeping low-res placeholders mounted during progressive loads.",
+        "timestamp": "2026-10-04T23:15:00Z"
+      },
+      {
         "version": "1.0.8.2",
         "targetAbi": "10.9.0.0",
         "sourceUrl": "https://github.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/releases/download/v1.0.8.2/jellyfin-plugin-seer.zip",

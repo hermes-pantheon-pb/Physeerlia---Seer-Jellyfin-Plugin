@@ -45,14 +45,12 @@ import './styles/seer.scss';
     }
 
     function getHeaderOffset(): number {
-        const header = document.querySelector('header.MuiAppBar-root, header:not([style*="display: none"]), .skinHeader:not([class*="hide"]):not([style*="display: none"])');
-        if (header) {
-            const rect = header.getBoundingClientRect();
-            if (rect.bottom > 0) {
-                return Math.ceil(rect.bottom);
-            }
-            if (rect.height > 0) {
-                return Math.ceil(rect.height);
+        const candidates = document.querySelectorAll('header.MuiAppBar-root, header, .skinHeader');
+        for (let i = 0; i < candidates.length; i++) {
+            const el = candidates[i] as HTMLElement;
+            const rect = el.getBoundingClientRect();
+            if (rect.height > 0 && rect.bottom > 0) {
+                return Math.max(Math.ceil(rect.bottom), 56);
             }
         }
         return 64;
@@ -71,11 +69,14 @@ import './styles/seer.scss';
         if (!isSeerOpen) return;
         document.querySelectorAll('header, .skinHeader, .MuiAppBar-root').forEach(el => {
             const h = el as HTMLElement;
+            h.setAttribute('data-seer-active', 'true');
             h.style.setProperty('background-color', '#101014', 'important');
             h.style.setProperty('background', '#101014', 'important');
             h.style.setProperty('backdrop-filter', 'none', 'important');
             h.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
             h.style.setProperty('z-index', '1060', 'important');
+            h.style.setProperty('opacity', '1', 'important');
+            h.style.setProperty('visibility', 'visible', 'important');
         });
 
         const navStack = document.querySelector('header .MuiToolbar-root > .MuiStack-root') as HTMLElement;
@@ -87,6 +88,25 @@ import './styles/seer.scss';
         });
     }
 
+    let headerSyncScheduled = false;
+    function scheduleHeaderSync() {
+        if (!isSeerOpen || headerSyncScheduled) return;
+        headerSyncScheduled = true;
+        requestAnimationFrame(() => {
+            headerSyncScheduled = false;
+            if (isSeerOpen) {
+                if (!document.body.classList.contains('seer-active')) {
+                    document.body.classList.add('seer-active');
+                }
+                if (!document.documentElement.classList.contains('seer-active')) {
+                    document.documentElement.classList.add('seer-active');
+                }
+                syncHeaderState();
+                updateSeerPosition();
+            }
+        });
+    }
+
     function openSeer() {
         document.body.classList.add('seer-active');
         document.documentElement.classList.add('seer-active');
@@ -94,6 +114,8 @@ import './styles/seer.scss';
         document.body.style.overflow = 'hidden';
 
         syncHeaderState();
+        setTimeout(scheduleHeaderSync, 100);
+        setTimeout(scheduleHeaderSync, 400);
 
         if (!seerContainer) {
             seerContainer = document.createElement('div');
@@ -546,19 +568,28 @@ import './styles/seer.scss';
         });
     }
 
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((mutations) => {
         if (isSeerOpen) {
+            for (let i = 0; i < mutations.length; i++) {
+                const target = mutations[i].target as HTMLElement;
+                if (target === document.body || target === document.documentElement ||
+                    target.nodeName === 'HEADER' || (target.closest && target.closest('header, .skinHeader'))) {
+                    scheduleHeaderSync();
+                    break;
+                }
+            }
             return;
         }
         scheduleInjectNavigation();
     });
 
+    const observeConfig = { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] };
     if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true });
+        observer.observe(document.body, observeConfig);
     } else {
         document.addEventListener('DOMContentLoaded', () => {
             if (document.body) {
-                observer.observe(document.body, { childList: true, subtree: true });
+                observer.observe(document.body, observeConfig);
             }
             scheduleInjectNavigation();
         });
