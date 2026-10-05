@@ -1,11 +1,11 @@
 {
   "category": "General",
   "guid": "b1b87a2a-4db3-4fc9-b59a-143c7b39922e",
-  "name": "Physeerlia",
-  "description": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into Jellyfin with zero-login SSO delegation.",
-  "overview": "Physeerlia brings Overseerr and Jellyseerr directly into the Jellyfin client with zero-login SSO delegation, per-user permission enforcement, and optional Abyss frosted glass styling.",
+  "name": "Physeerlia (Dev)",
+  "description": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into Jellyfin with zero-login SSO delegation [Development Channel].",
+  "overview": "Physeerlia Development Channel: Tracks latest experimental performance optimizations, desktop background isolation, and rapid fixes.",
   "owner": "hermes-pantheon-pb",
   "targetAbi": "10.9.0.0",
-  "version": "1.0.8.3",
+  "version": "1.0.9.0",
   "imagePath": "logo.png"
 }

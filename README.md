@@ -139,12 +139,22 @@ jellyfin-plugin-seer/
 
 1. Open your Jellyfin admin dashboard and go to **Dashboard → Plugins → Repositories**.
 2. Click the **+** (Add) button.
-3. Fill in the fields:
-   * **Repository Name**: `Physeerlia` (or any name you prefer)
+3. Choose your release channel and fill in the fields:
+
+   **Stable Channel (Default / Main Branch)**:
+   * **Repository Name**: `Physeerlia`
    * **Repository URL**:
      ```text
      https://raw.githubusercontent.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/main/manifest.json
      ```
+
+   **Development Channel (Experimental / Development Branch)**:
+   * **Repository Name**: `Physeerlia (Dev)`
+   * **Repository URL**:
+     ```text
+     https://raw.githubusercontent.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/development/manifest.json
+     ```
+
 4. Click **Save**.
 5. Switch to the **Catalog** tab in Jellyfin, locate **Physeerlia**, and click **Install**.
 6. Restart your Jellyfin server.

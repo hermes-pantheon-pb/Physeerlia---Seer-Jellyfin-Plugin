@@ -28,6 +28,7 @@ Thumbs.db
 
 # Release artifacts
 *.zip
+!jellyfin-plugin-seer.zip
 artifacts/
 
 # Environment & Logs

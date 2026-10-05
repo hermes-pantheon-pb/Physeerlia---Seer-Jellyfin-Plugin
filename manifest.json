@@ -3,10 +3,18 @@
     "category": "General",
     "guid": "b1b87a2a-4db3-4fc9-b59a-143c7b39922e",
     "name": "Physeerlia",
-    "description": "Native Overseerr and Jellyseerr requests and discovery integration.",
+    "description": "Native Overseerr and Jellyseerr requests and discovery integration [Development Channel].",
     "owner": "hermes-pantheon-pb",
-    "overview": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into the Jellyfin web client with automatic zero-login SSO delegation and granular per-user permissions.",
+    "overview": "Seamlessly integrates Overseerr and Jellyseerr requests, discovery, and media management directly into the Jellyfin web client with automatic zero-login SSO delegation [Development Channel: desktop background isolation and rapid optimizations].",
     "versions": [
+      {
+        "version": "1.0.9.0",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://raw.githubusercontent.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/development/jellyfin-plugin-seer.zip",
+        "checksum": "62d660bc8ce09d1fa68798953b0870e8",
+        "changelog": "Development Build v1.0.9.0: Eliminate lingering topbar underline when navigating back to Jellyfin; isolate and deactivate underlying Jellyfin DOM while Seer is active to achieve identical 60 FPS performance on desktop whether navigating from Jellyfin or directly loading Seer.",
+        "timestamp": "2026-10-04T23:55:00Z"
+      },
       {
         "version": "1.0.8.3",
         "targetAbi": "10.9.0.0",

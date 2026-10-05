@@ -192,11 +192,15 @@ import './styles/seer.scss';
         });
         document.querySelectorAll('header, .skinHeader, .MuiAppBar-root').forEach(el => {
             const h = el as HTMLElement;
+            h.removeAttribute('data-seer-active');
             h.style.removeProperty('background-color');
             h.style.removeProperty('background');
             h.style.removeProperty('backdrop-filter');
             h.style.removeProperty('-webkit-backdrop-filter');
             h.style.removeProperty('z-index');
+            h.style.removeProperty('opacity');
+            h.style.removeProperty('visibility');
+            h.style.removeProperty('border-bottom');
         });
 
         if (seerContainer) {

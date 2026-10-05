@@ -299,6 +299,17 @@ body.seer-active {
         pointer-events: none !important;
         animation-play-state: paused !important;
     }
+
+    /* Performance Isolation: Hide underlying Jellyfin app pages & backdrops to eliminate GPU compositor load */
+    #reactRoot > .backdropContainer,
+    #reactRoot > .backgroundContainer,
+    #reactRoot .MuiBox-root > main,
+    .mainAnimatedPages,
+    .appfooter {
+        visibility: hidden !important;
+        pointer-events: none !important;
+        content-visibility: hidden !important;
+    }
 }
 
 /* Ensure override against high-specificity theme selectors like Abyss html[data-theme="dark"] */
