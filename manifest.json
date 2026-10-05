@@ -11,7 +11,7 @@
         "version": "1.0.9.0",
         "targetAbi": "10.9.0.0",
         "sourceUrl": "https://raw.githubusercontent.com/hermes-pantheon-pb/Physeerlia---Seer-Jellyfin-Plugin/development/jellyfin-plugin-seer.zip",
-        "checksum": "62d660bc8ce09d1fa68798953b0870e8",
+        "checksum": "4f82d45a360ed28c85529451035d8488",
         "changelog": "Development Build v1.0.9.0: Eliminate lingering topbar underline when navigating back to Jellyfin; isolate and deactivate underlying Jellyfin DOM while Seer is active to achieve identical 60 FPS performance on desktop whether navigating from Jellyfin or directly loading Seer.",
         "timestamp": "2026-10-04T23:55:00Z"
       },
